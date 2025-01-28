@@ -1,0 +1,28 @@
+/* Estilos para a ponta do modal */
+.absolute {
+    position: absolute;
+  }
+  
+  .border-l-8 {
+    border-left-width: 8px;
+  }
+  
+  .border-r-8 {
+    border-right-width: 8px;
+  }
+  
+  .border-b-8 {
+    border-bottom-width: 8px;
+  }
+  
+  .border-l-transparent {
+    border-left-color: transparent;
+  }
+  
+  .border-r-white {
+    border-right-color: white; /* Cor do fundo do modal */
+  }
+  
+  .border-b-transparent {
+    border-bottom-color: transparent;
+  }
