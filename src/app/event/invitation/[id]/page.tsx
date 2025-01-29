@@ -1,14 +1,13 @@
-import { Footer } from "../footer";
-import Dashboard from "./main-item";
+import { Footer } from "@/app/footer";
+import InvitationPage from "./invitation";
 
-export default function searchPlaces() {
+export default function Invitation() {
     return (
         <div className="min-h-screen flex flex-col">
       <div className="flex-grow">
-        <Dashboard />
+        <InvitationPage />
       </div>
       <Footer />
     </div>
     )
-
 }

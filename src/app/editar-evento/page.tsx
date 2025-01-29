@@ -4,10 +4,12 @@ export default function RegisterUser() {
 
     return (
         <>
-            <div className="bg-white min-h-screen">
-                <EditEvent />
-                <Footer />
-            </div>
+            <div className="min-h-screen flex flex-col">
+      <div className="flex-grow">
+        <EditEvent />
+      </div>
+      <Footer />
+    </div>
         </>
     )
 }

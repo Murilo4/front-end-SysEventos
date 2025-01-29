@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Cookies from 'universal-cookie'
+import { BrowserMultiFormatReader } from '@zxing/library'
 
 const MainPage: React.FC = () => {
   const [events, setEvents] = useState<any[]>([])
@@ -13,7 +14,9 @@ const MainPage: React.FC = () => {
   const [eventCode, setEventCode] = useState<string>('') 
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null)
   const [isQrCodeVisible, setIsQrCodeVisible] = useState<boolean>(false)
+  const [scanResult, setScanResult] = useState<string | null>(null)
   const qrCodeRef = useRef<HTMLDivElement>(null)
+  const videoRef = useRef<HTMLVideoElement | null>(null)
   const router = useRouter()
   const cookies = new Cookies()
 
@@ -154,20 +157,6 @@ const MainPage: React.FC = () => {
     setIsQrCodeVisible(false)
   }
 
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (qrCodeRef.current && !qrCodeRef.current.contains(event.target as Node)) {
-        setIsQrCodeVisible(false)
-      }
-    }
-
-    document.addEventListener('click', handleClickOutside)
-
-    return () => {
-      document.removeEventListener('click', handleClickOutside)
-    }
-  }, [])
-
   const downloadImage = async (url: string) => {
     try {
       const response = await fetch(url)
@@ -186,6 +175,32 @@ const MainPage: React.FC = () => {
       toast.error('Erro ao baixar a imagem.')
     }
   }
+
+  // Função para processar o QR Code
+  const handleScan = (result: string) => {
+    if (result) {
+      setScanResult(result)
+      router.push(`/evento/${result}`)
+    }
+  }
+
+  useEffect(() => {
+    const scanner = new BrowserMultiFormatReader()
+    if (videoRef.current) {
+      scanner.decodeFromVideoDevice(null, videoRef.current, (result, error) => {
+        if (result) {
+          handleScan(result.getText())
+        }
+        if (error) {
+          console.error(error)
+        }
+      })
+    }
+
+    return () => {
+      scanner.reset()
+    }
+  }, [])
 
   return (
     <>
@@ -233,7 +248,11 @@ const MainPage: React.FC = () => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          
+            {scanResult && <p>Resultado: {scanResult}</p>}
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-8">
             {loader ? (
               <p>Carregando eventos...</p>
             ) : events.length === 0 ? (
@@ -243,7 +262,7 @@ const MainPage: React.FC = () => {
                 <div key={event.id} className="border p-4 rounded-md shadow-md flex flex-col items-center">
                   <h3 className="text-2xl mb-4 font-semibold text-center">{event.eventName}</h3>
                   {event.photo ? (
-                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className=" h-auto rounded-md mb-2" />
+                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className="h-auto rounded-md mb-2" />
                   ) : (
                     <p>Foto do evento não disponível</p>
                   )}
@@ -308,6 +327,28 @@ const MainPage: React.FC = () => {
             )}
           </div>
         </div>
+        <div className="text-center mt-6">
+            <h2 className="text-xl font-semibold">Acessar Evento</h2>
+            <form onSubmit={handleSubmitCode} className="flex flex-col items-center space-y-4">
+              <input
+                type="text"
+                value={eventCode}
+                onChange={(e) => setEventCode(e.target.value)}
+                placeholder="Insira o código ou URL do evento"
+                className="px-4 py-2 border border-gray-300 rounded-md"
+              />
+              <button
+                type="submit"
+                className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue-600"
+              >
+                Acessar Evento
+              </button>
+            </form>
+
+            <h3 className="mt-6 mb-4">Ou, escaneie o QR Code</h3>
+            <div className="w-full max-w-xs mx-auto mb-6">
+              <video ref={videoRef} width="100%" height="auto" />
+            </div>
       </div>
     </>
   )

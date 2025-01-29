@@ -275,6 +275,13 @@ export const CreateNewEvent = () => {
             >
               {loader ? 'Enviando...' : 'Cadastrar evento'}
             </button>
+            <button
+                type="button"
+                className="w-full mt-4 text-xl bg-gray-500 hover:scale-100 scale-95 text-white font-bold py-3 px-4 rounded-3xl hover:bg-gray-600 transition"
+                onClick={() => router.back()} // Voltar à página anterior
+              >
+                Voltar
+              </button>
           </form>
         </div>
       </div>
