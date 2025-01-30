@@ -4,6 +4,7 @@ export type FormCreateEvent = {
   horarioIni: string,
   horarioFinal: string,
   photo: string,
+  participants: string,
   description: string,
 }
 
@@ -13,6 +14,7 @@ export type FormCreateEventErrors = {
     horarioIni: string[],
     horarioFinal: string[],
     photo: string[],
+    participants: string[],
     description: string[],
 }
 

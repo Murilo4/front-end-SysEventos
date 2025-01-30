@@ -14,6 +14,7 @@ const initialValues: FormCreateEvent = {
   horarioIni: '',
   horarioFinal: '',
   photo: '',
+  participants: '',
   description: '',
 }
 
@@ -23,6 +24,7 @@ const initialErrors: FormCreateEventErrors = {
   horarioIni: [],
   horarioFinal: [],
   photo: [],
+  participants: [],
   description: [],
 }
 
@@ -249,6 +251,17 @@ export const CreateNewEvent = () => {
               type="text"
               name="description"
               placeholder="Descrição"
+              className="w-full border border-gray-400 focus:scale-105 rounded-2xl placeholder:text-black p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              onChange={handleInputChange}
+            />
+            {/* Verificação de erro na descrição */}
+            {formErrors.description && formErrors.description.length > 0 && (
+              <p className="text-red text-sm">{formErrors.description[0]}</p>
+            )}
+            <input
+              type="number"
+              name="quantidade"
+              placeholder="Quantidade de participantes"
               className="w-full border border-gray-400 focus:scale-105 rounded-2xl placeholder:text-black p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
               onChange={handleInputChange}
             />

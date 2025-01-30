@@ -16,6 +16,7 @@ const initialErrors: FormCreateEventErrors = {
   horarioFinal: [],
   photo: [],
   description: [],
+  participants: [],
 }
 
 export const EditEvent = () => {
@@ -26,6 +27,7 @@ export const EditEvent = () => {
     horarioFinal: '', // Campo de horário final
     photo: null,
     description: '',
+    participants: ''
   });
   const [formErrors, setFormErrors] = useState<FormCreateEventErrors>(initialErrors);
   const [loader, setLoader] = useState<boolean>(false);
@@ -65,7 +67,8 @@ export const EditEvent = () => {
             horarioIni: data.event.horarioInicio,  // Ajuste para 'horarioInicio' em vez de 'horarioIni'
             horarioFinal: data.event.horarioFinal, // Manter 'horarioFinal'
             photo: data.event.photo,           // Foto
-            description: data.event.description, // Descrição
+            description: data.event.description,
+            participants: data.participants
           });
         if (data.event.photo) {
           setImagePreview(`http://localhost:8000/${data.event.photo}`); // Define a imagem atual como preview
@@ -171,12 +174,13 @@ export const EditEvent = () => {
         formData.append('horarioIni', formValues.horarioIni);
         formData.append('horarioFinal', formValues.horarioFinal);
         formData.append('description', formValues.description);
+        formData.append('participants', formValues.participants)
   
         // Verifica se a foto foi alterada e adiciona o arquivo
         if (formValues.photo instanceof File) {
           formData.append('photo', formValues.photo); // Envia o arquivo real
         }
-  
+        console.log(formValues)
         const response = await fetch(`${apiUrl}/update-event/${eventId}/`, {
           method: 'PUT',
           headers: {
@@ -186,7 +190,7 @@ export const EditEvent = () => {
         });
   
         const data = await response.json();
-  
+        console.log(response)
         if (response.ok) {
           toast.success(data.message);
           router.push('/main-page');
@@ -252,6 +256,17 @@ export const EditEvent = () => {
                 className="w-full border border-gray-400 focus:scale-105 rounded-2xl placeholder:text-black p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 onChange={handleInputChange}
               />
+              <input
+                  type="number"
+                  name="participants"
+                  placeholder="Quantidade de participantes"
+                  className="w-full border border-gray-400 focus:scale-105 rounded-2xl placeholder:text-black p-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  onChange={handleInputChange}
+                />
+                {/* Verificação de erro na descrição */}
+                {formErrors.participants && formErrors.participants.length > 0 && (
+                  <p className="text-red text-sm">{formErrors.participants[0]}</p>
+                )}
               <div className="w-full h-48 bg-gray-200 rounded-xl overflow-hidden mb-4">
                 {imagePreview ? (
                   <img src={imagePreview} alt="Preview da Foto" className="object-cover w-full h-full" />
