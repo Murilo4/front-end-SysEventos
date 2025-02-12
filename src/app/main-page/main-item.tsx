@@ -14,6 +14,7 @@ interface EventData {
   photo: string;
   qrCode: string;
   isActive: boolean;
+  existFilter: boolean;
   // Add any other properties you expect
 }
 const MainPage: React.FC = () => {
@@ -21,7 +22,7 @@ const MainPage: React.FC = () => {
   const [events, setEvents] = useState<EventData[]>([])
   const [canAddEvent, setCanAddEvent] = useState<boolean | null>(null)
   const [loader, setLoader] = useState<boolean>(false)
-  const [eventCode, setEventCode] = useState<string>('') 
+  const [eventCode, setEventCode] = useState<string>('')
   const [qrCodeImage, setQrCodeImage] = useState<string | null>(null)
   const [isQrCodeVisible, setIsQrCodeVisible] = useState<boolean>(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
@@ -32,7 +33,7 @@ const MainPage: React.FC = () => {
     setCanAddEvent(userValid === true)
   }, [cookies])
   // Função para validar o token do usuário
-  const validateToken = useCallback ( async () => {
+  const validateToken = useCallback(async () => {
     const token = cookies.get('access')
     if (!token) {
       router.push('/')
@@ -62,7 +63,7 @@ const MainPage: React.FC = () => {
   }
 
   const handleLogout = () => {
-    cookies.remove('access') 
+    cookies.remove('access')
     cookies.remove('user_valid')
     router.push('/')
     toast.success('Você foi deslogado com sucesso!')
@@ -116,7 +117,7 @@ const MainPage: React.FC = () => {
         method: 'DELETE',
         headers: {
           'Authorization': `Bearer ${cookies.get('access')}`,
-          'Content-Type': 'application/json', 
+          'Content-Type': 'application/json',
         },
         body: JSON.stringify({ eventId }),
       })
@@ -187,7 +188,7 @@ const MainPage: React.FC = () => {
     if (result) {
       router.push(`/evento/invitation/${result}`)
     }
-  }, [router]); 
+  }, [router]);
 
   useEffect(() => {
     const scanner = new BrowserMultiFormatReader()
@@ -211,7 +212,7 @@ const MainPage: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <div className="container mx-auto p-3 relative">
+      <div className="container mx-auto p-2 relative">
         <div className="flex justify-end space-x-2 sm:flex sm:space-x-2 z-10">
           <button
             onClick={() => router.push('/meu-perfil')}
@@ -221,13 +222,13 @@ const MainPage: React.FC = () => {
           </button>
           <button
             onClick={handleLogout}
-            className="bg-red text-white py-3 px-4 rounded-md hover:bg-red"
+            className="bg-red text-white py-2 px-4 rounded-md hover:bg-red"
           >
             Sair
           </button>
         </div>
-        <div className="container mx-auto p-6 relative pt-4">
-          <h1 className="text-3xl font-bold text-center mb-3">Gerenciamento de Eventos</h1>
+        <div className="container mx-auto relative">
+          <h1 className="text-2xl font-bold text-center mb-1">Gerenciamento de Eventos</h1>
 
           {canAddEvent === null ? (
             <p>Carregando...</p>
@@ -261,14 +262,14 @@ const MainPage: React.FC = () => {
               <p className="text-center">Nenhum evento encontrado.</p>
             ) : (
               events.map(event => (
-                <div key={event.id} className="border border-blue-mid p-4 rounded-md shadow-md shadow-blue-mid flex flex-col items-center">
-                  <h3 className="text-2xl mb-2 font-semibold text-center">{event.eventName}</h3>
+                <div key={event.id} className="border border-blue-mid p-2 rounded-md shadow-md shadow-blue-mid flex flex-col items-center">
+                  <h3 className="text-xl mb-2 font-semibold text-center">{event.eventName}</h3>
                   {event.photo ? (
-                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className="h-1/3 rounded-md mb-2" />
+                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className="h-1/4 rounded-md mb-2" />
                   ) : (
                     <p>Foto do evento não disponível</p>
                   )}
-                  <p className="text-center mt-2 text-xl">{event.description}</p>
+                  <p className="text-center mt-2 text-lg">{event.description}</p>
                   {event.qrCode && (
                     <div className="w-2/4">
                       <img
@@ -287,7 +288,7 @@ const MainPage: React.FC = () => {
                   )}
                   {isQrCodeVisible && qrCodeImage && (
                     <div
-                      className="fixed w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20"
+                      className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-20"
                       onClick={closeQrCodeImage}
                     >
                       <img
@@ -298,7 +299,7 @@ const MainPage: React.FC = () => {
                     </div>
                   )}
                   <div className="flex justify-center w-full mt-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
                       <button
                         onClick={() => handleEditEvent(event.id)}
                         className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue"
@@ -322,53 +323,60 @@ const MainPage: React.FC = () => {
                         className="bg-green text-white py-2 px-4 rounded-md hover:bg-green"
                         disabled={!canAddEvent}
                       >
-                        Iniciar evento
+                        Visualizar evento
                       </button>
                     </div>
                   </div>
+                  <button
+                    onClick={() => router.push(`/past-events/${event.id}`)}
+                    className="bg-purple text-white py-2 px-4 rounded-md hover:bg-purple w-full mt-2"
+                    disabled={!event.existFilter}
+                  >
+                    Visualizar Eventos Realizados
+                  </button>
                 </div>
               ))
             )}
           </div>
         </div>
         <div className="flex justify-center mt-4">
-        <div className="w-full max-w-md mr-4">
-          <label htmlFor="eventCode" className="block text-gray-700 font-bold mb-2">
-            Código ou Link do Evento:
-          </label>
-          <input
-            type="text"
-            id="eventCode"
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400"
-            value={eventCode}
-            onChange={(e) => setEventCode(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === 'Enter') {
-                handleEventNavigation(eventCode)
-              }
-            }}
-          />
+          <div className="w-full max-w-md mr-4">
+            <label htmlFor="eventCode" className="block text-gray-700 font-bold mb-2">
+              Código ou Link do Evento:
+            </label>
+            <input
+              type="text"
+              id="eventCode"
+              className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:ring-2 focus:ring-blue-400"
+              value={eventCode}
+              onChange={(e) => setEventCode(e.target.value)}
+              onKeyPress={(e) => {
+                if (e.key === 'Enter') {
+                  handleEventNavigation(eventCode)
+                }
+              }}
+            />
+          </div>
+          <button
+            onClick={() => handleEventNavigation(eventCode)}
+            className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50"
+            disabled={!eventCode}
+          >
+            Acessar Evento
+          </button>
         </div>
+
         <button
-          onClick={() => handleEventNavigation(eventCode)}
-          className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue-600 disabled:opacity-50"
-          disabled={!eventCode}
+          onClick={() => setIsQrCodeVisible(true)}
+          className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded flex justify-center"
         >
-          Acessar Evento
+          Escanear QR Code
         </button>
-      </div>
 
-      <button
-        onClick={() => setIsQrCodeVisible(true)}
-        className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded flex justify-center"
-      >
-        Escanear QR Code
-      </button>
-
-      {isQrCodeVisible && (
-        <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20" onClick={() => setIsQrCodeVisible(false)}>
-          <video ref={videoRef} autoPlay playsInline muted />
-        </div>
+        {isQrCodeVisible && (
+          <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20" onClick={() => setIsQrCodeVisible(false)}>
+            <video ref={videoRef} autoPlay playsInline muted />
+          </div>
         )}
       </div>
     </>

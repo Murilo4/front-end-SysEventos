@@ -121,7 +121,7 @@ const EventStatistics: React.FC = () => {
   return (
     <>
       <ToastContainer />
-      <div className="relative container mx-auto p-6">
+      <div className="container mx-auto p-2 relative">
         <button
           onClick={handleGoBack}
           className="sm:absolute top-4 right-4 bg-gray-600 text-white py-2 px-4 rounded-md"

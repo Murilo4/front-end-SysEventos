@@ -25,8 +25,9 @@ export const Footer = () => {
 
   {/* Rodapé */}
   <div>
-    <p className="text-black">2024 Todos os direitos reservados</p>
+
     <div className="flex justify-center mt-5">
+    <p className="text-black pr-4">2024 Todos os direitos reservados</p>
       <a href="/termos-de-uso" target="_blank" className="hover:underline mr-7">
         Termos de uso
       </a>

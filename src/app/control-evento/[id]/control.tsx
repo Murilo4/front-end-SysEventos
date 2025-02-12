@@ -113,6 +113,10 @@ const ControlEvento: React.FC = () => {
     }
   }, [cookies, eventId])
 
+  const handleGoBack = () => {
+    router.push('/main-page') // Redirect to the main page
+  }
+
   const fetchQuestionsAndAnswers = useCallback(async () => {
     setIsLoadingQuestions(true)
     const token = cookies.get('access')
@@ -288,6 +292,12 @@ const ControlEvento: React.FC = () => {
     <>
       <ToastContainer />
       <div className="container mx-auto p-6">
+      <button
+                  onClick={handleGoBack}
+                  className="sm:absolute top-4 right-4 bg-gray-600 text-white py-2 px-4 rounded-md"
+                >
+                  Voltar
+                </button>
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800">{event?.eventName || 'Carregando...'}</h1>
           <p className="text-lg text-gray-600">{event?.description}</p>
@@ -365,13 +375,16 @@ const ControlEvento: React.FC = () => {
                     </li>
                   ))}
                 </ul>
+                <div>
                 <button
                   onClick={startEvent}
                   className="bg-green text-white py-2 px-6 rounded-md hover:bg-green-dark transition duration-300 mt-4"
                 >
                   Iniciar Evento
                 </button>
+                </div>
               </>
+              
             )}
           </div>
         )}

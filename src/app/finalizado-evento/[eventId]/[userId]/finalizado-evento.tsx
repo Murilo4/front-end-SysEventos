@@ -55,16 +55,14 @@ const AgradecimentoPage = () => {
 
   // Função para renderizar as perguntas e as respostas do usuário
   const renderQuestionAnswer = (question: Question) => {
-    const userAnswers = question.user_answers; // Respostas do usuário
-  
+    const userAnswers = question.user_answers;
+
     switch (question.question_type) {
       case 'open_short':
       case 'open_long':
-        // Perguntas abertas (mostrar apenas o texto da resposta)
         return <p className="text-lg italic text-gray-700">{userAnswers?.[0]?.answer_text}</p>;
-  
+
       case 'multiple_choice':
-        // Perguntas de múltipla escolha (mostrar as opções selecionadas)
         return (
           <div className="space-y-2">
             {question.options.map((option, index) => (
@@ -72,19 +70,20 @@ const AgradecimentoPage = () => {
                 <input
                   type="checkbox"
                   checked={userAnswers?.some(
-                    (answer) => answer.answer_text === option.text // Verificando se o texto da resposta coincide com o texto da opção
+                    (answer) => answer.answer_text === option.text // Correct validation for multiple choice
                   )}
                   disabled
                   className="mr-2"
                 />
-                <span className="text-gray-700">{option.text}</span> {/* Exibindo o texto da opção */}
+                <span className={`text-gray-700 ${userAnswers?.some(answer => answer.answer_text === option.text) ? 'font-bold' : ''}`}>
+                  {option.text}
+                </span> {/* Displaying the option text */}
               </div>
             ))}
           </div>
         );
-  
+
       case 'single_choice':
-        // Perguntas de escolha única (mostrar a opção selecionada)
         return (
           <div className="space-y-2">
             {question.options.map((option, index) => (
@@ -92,17 +91,19 @@ const AgradecimentoPage = () => {
                 <input
                   type="radio"
                   checked={userAnswers?.some(
-                    (answer) => answer.answer_text === option.text // Comparando texto de resposta
+                    (answer) => answer.answer_text === option.text // Correct validation for single choice
                   )}
                   disabled
                   className="mr-2"
                 />
-                <span className="text-gray-700">{option.text}</span> {/* Exibindo o texto da opção */}
+                <span className={`text-gray-700 ${userAnswers?.some(answer => answer.answer_text === option.text) ? 'font-bold' : ''}`}>
+                  {option.text}
+                </span> {/* Displaying the option text */}
               </div>
             ))}
           </div>
         );
-  
+
       default:
         return null;
     }

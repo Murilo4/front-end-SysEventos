@@ -4,7 +4,7 @@ export default function RegisterUser() {
 
   return (
     <>
-      <div className="bg-white min-h-screen">
+      <div className="min-h-screen flex flex-col">
       <div className="flex-grow">
         <EventStatistics />
         </div>
