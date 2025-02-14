@@ -1,7 +1,8 @@
 'use client'
 
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'next/navigation';
+import React, { useState, useEffect, useMemo } from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import Cookies from 'universal-cookie';
 
 // Extend the Window interface to include MercadoPago
 declare global {
@@ -18,9 +19,11 @@ interface Plan {
 }
 
 const PaymentPage = () => {
+  const cookies = useMemo(() => new Cookies(), []);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [preferenceId, setPreferenceId] = useState<string | null>(null);
   const { id } = useParams();
+  const router = useRouter();
 
   useEffect(() => {
     // Fetch plan details
@@ -69,20 +72,38 @@ const PaymentPage = () => {
     event.preventDefault();
     if (!plan) return;
 
-    // Aqui você envia o ID do plano junto com o restante das informações
-    const formData = new FormData();
-    formData.append('plan_id', plan.id);  // Adicionando o ID do plano
-    formData.append('title', plan.planName);
-    formData.append('quantity', '1');
-    formData.append('unit_price', plan.price.toString());
+    // Criar objeto de dados de pagamento
+    const paymentData = {
+      plan_id: plan.id,
+      title: plan.planName,
+      quantity: 1,
+      unit_price: plan.price,
+    };
+
     const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
     const response = await fetch(`${apiUrl}/create_preference/`, {
       method: 'POST',
-      body: formData,
+      headers: {
+        'Authorization': `Bearer ${cookies.get('access')}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(paymentData),
     });
 
     const data = await response.json();
-    setPreferenceId(data.preference_id);
+
+    // Verificar se a criação da preferência foi bem-sucedida
+    if (response.status === 200) {
+      setPreferenceId(data.preference_id); // Armazena o preference_id
+      if (data.payment_link) {
+        // Redirecionar o usuário para o link de pagamento retornado
+        window.location.href = data.payment_link; 
+      } else {
+        console.error("Erro: payment_link não encontrado na resposta.");
+      }
+    } else {
+      console.error("Erro ao criar a preferência: ", data.message);
+    }
   };
 
   if (!plan) {
@@ -91,6 +112,12 @@ const PaymentPage = () => {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-r from-blue-500 to-purple-600 p-6">
+      <button
+        onClick={() => router.push('/meu-perfil')}
+        className="flex justify-start items-start text-lg border-blue-thirth rounded-2xl py-2 px-4 bg-blue-thirth text-white font-medium mb-6"
+      >
+        Voltar
+      </button>
       <h1 className="text-3xl font-bold text-white mb-6">Pagamento</h1>
       <div className="bg-white p-8 rounded-lg shadow-lg w-full max-w-md mx-auto mb-6">
         <h2 className="text-2xl font-semibold text-gray-800 mb-4">{plan.planName}</h2>

@@ -314,10 +314,9 @@ const QuestionsPage: React.FC = () => {
         },
         body: formData,
       })
-
+  
       if (response.ok) {
         toast.success('Pergunta criada com sucesso!')
-        fetchQuestions() // Atualizar a lista de perguntas
         setNewQuestion('') // Limpar o campo de nova pergunta
         setOptions([]) // Limpar as opções
         setQuestionImage(null)
@@ -325,6 +324,7 @@ const QuestionsPage: React.FC = () => {
         if (fileInputRef.current) {
           fileInputRef.current.value = ''; // Limpa o valor do input
         }
+        fetchQuestions() // Atualizar a lista de perguntas apenas após a confirmação do backend
       } else {
         toast.error('Erro ao criar pergunta.')
       }

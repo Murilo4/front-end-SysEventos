@@ -64,7 +64,7 @@ const PlanosPage: React.FC = () => {
                 onClick={() => router.push('/meu-perfil')}
                 className="flex items-center text-lg border-blue-thirth rounded-2xl py-2 px-4 bg-blue-thirth text-white font-medium mb-6"
             >
-                Voltar para Meu Perfil
+                Voltar
             </button>
 
             <h1 className="text-3xl font-bold text-center text-principal-blue mb-6">Planos Disponíveis</h1>

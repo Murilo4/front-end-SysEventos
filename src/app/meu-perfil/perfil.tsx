@@ -19,6 +19,9 @@ const UserAccount = () => {
     phone: '',
     photo: ''
   });
+  const [planData, setPlanData] = useState({
+    planName: ''
+  });
   const [originalUserData, setOriginalUserData] = useState(userData);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
@@ -45,9 +48,11 @@ const UserAccount = () => {
             phone: data.userData.phone,
             photo: data.userData.photo // Foto vinda do backend
           };
+          console.log(data.subscriptionData.PlanName)
+          setPlanData({ planName: data.subscriptionData.PlanName }); // Ensure planData is set correctly
           setUserData(fetchedData);
           setOriginalUserData(fetchedData);
-          
+
           // Se a foto não estiver disponível, usa a foto padrão
           if (fetchedData.photo) {
             const fullImageUrl = `http://localhost:8000${fetchedData.photo}`;
@@ -127,14 +132,15 @@ const UserAccount = () => {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${cookies.get('access')}` 
+          'Authorization': `Bearer ${cookies.get('access')}`
         },
         body: JSON.stringify(userData)
       });
       const data = await response.json();
+      console.log(data)
       if (data.success) {
         console.log('Dados atualizados com sucesso:', data);
-        setOriginalUserData(userData);
+        setOriginalUserData(userData);x
         toast.success(data.message || 'Dados atualizados com sucesso.');
       } else {
         console.error('Erro ao atualizar dados:', data);
@@ -189,22 +195,22 @@ const UserAccount = () => {
           onClick={HandleRedirect}
           className="flex text-lg max-h-10 border-blue-thirth rounded-2xl py-2 px-4 bg-blue-thirth text-white font-medium justify-center h-auto"
         >Voltar</button>
-         <div className="text-lg mt-4 md:mt-0 xl:mr-20"> {/* Margem superior em telas pequenas */}
-    <p className="mb-2">Plano atual da conta:</p>
-    <p className="text-xl">Plano Gratuito</p>
-    <button
-      className="text-lg border-4 hover:bg-blue-thirth hover:text-white border-blue-thirth rounded-xl px-4 mt-4 md:mt-0"
-      onClick={() => router.push('/planos')}
-    >
-      Mudar de plano
-    </button>
-  </div>
+        <div className="text-lg mt-4 md:mt-0 xl:mr-20"> {/* Margem superior em telas pequenas */}
+          <p className="mb-2">Plano atual da conta:</p>
+          <p className="text-xl">{planData.planName}</p>
+          <button
+            className="text-lg border-4 hover:bg-blue-thirth hover:text-white border-blue-thirth rounded-xl px-4 mt-4 md:mt-0"
+            onClick={() => router.push('/planos')}
+          >
+            Mudar de plano
+          </button>
+        </div>
       </div>
-  
+
       <div className="flex justify-center mb-10">
         <p className="text-3xl text-slate-800 font-semibold">Meu perfil</p>
       </div>
-  
+
       {/* Flex container to align profile photo and user data form side by side */}
       <div className="flex flex-col md:flex-row justify-center items-start gap-12 md:gap-20 mb-20">
         {/* User Data Form */}
@@ -231,7 +237,7 @@ const UserAccount = () => {
                 className="w-full border-4 border-blue-thirth rounded-2xl p-3 shadow-md placeholder-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-  
+
             <div>
               <p className="text-lg font-medium">CPF:</p>
               <input
@@ -242,7 +248,7 @@ const UserAccount = () => {
                 className="w-full border-4 border-blue-thirth rounded-2xl p-3 shadow-md placeholder-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-  
+
             <div>
               <p className="text-lg font-medium">Telefone:</p>
               <input
@@ -253,7 +259,7 @@ const UserAccount = () => {
                 className="w-full border-4 border-blue-thirth rounded-2xl p-3 shadow-md placeholder-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
-  
+
             <div>
               <p className="text-lg font-medium">Senha:</p>
               <input
@@ -263,7 +269,7 @@ const UserAccount = () => {
                 className={`w-full border-4 border-blue-thirth rounded-2xl p-3 shadow-md placeholder-slate-900 focus:outline-none focus:ring-2 focus:ring-blue-500 ${!isEditingPassword ? 'bg-gray-100' : ''}`}
               />
             </div>
-  
+
             <div className="flex gap-4">
               <button
                 type="submit"
@@ -281,7 +287,7 @@ const UserAccount = () => {
             </div>
           </form>
         </div>
-  
+
         {/* Profile Photo Section */}
         <div className="flex justify-center w-full sm:w-1/4 md:w-1/3">
           <div className="relative w-60 h-60 mb-8">

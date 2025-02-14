@@ -6,6 +6,7 @@ import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Cookies from 'universal-cookie'
 import { BrowserMultiFormatReader } from '@zxing/library'
+import { FaEdit, FaTrash, FaQuestion, FaEye, FaDownload } from 'react-icons/fa'
 
 interface EventData {
   id: string;
@@ -27,6 +28,10 @@ const MainPage: React.FC = () => {
   const [isQrCodeVisible, setIsQrCodeVisible] = useState<boolean>(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const router = useRouter()
+  const [userData, setUserData] = useState({
+    username: '',
+    photo: ''
+  });
 
   const validateAuth = useCallback(() => {
     const userValid = cookies.get('user_valid')
@@ -91,10 +96,33 @@ const MainPage: React.FC = () => {
     setLoader(false)
   }, [cookies]);
 
+  const fetchUserData = useCallback(async () => {
+    try {
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const response = await fetch(`${apiUrl}/user-profile/`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${cookies.get('access')}`
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setUserData({
+          username: data.userData.username,
+          photo: data.userData.photo ? `http://localhost:8000${data.userData.photo}` : '/foto-padrao.png'
+        });
+      }
+    } catch (error) {
+      console.error('Erro ao buscar dados do usuário:', error);
+    }
+  }, [cookies]);
+
   useEffect(() => {
     validateToken()
     fetchEvents()
-  }, [fetchEvents, validateToken])
+    fetchUserData()
+  }, [fetchEvents, validateToken, fetchUserData])
 
 
   const handleCreateEvent = () => {
@@ -214,15 +242,20 @@ const MainPage: React.FC = () => {
       <ToastContainer />
       <div className="container mx-auto p-2 relative">
         <div className="flex justify-end space-x-2 sm:flex sm:space-x-2 z-10">
-          <button
+          <div
             onClick={() => router.push('/meu-perfil')}
-            className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue"
+            className="flex items-center space-x-2 cursor-pointer border-2 text-black py-2 px-4 rounded-2xl hover:bg-blue-mid hover:text-white"
           >
-            Meu Perfil
-          </button>
+            <img
+              src={userData.photo}
+              alt="Foto do usuário"
+              className="w-8 h-8 rounded-full"
+            />
+            <span>{userData.username}</span>
+          </div>
           <button
             onClick={handleLogout}
-            className="bg-red text-white py-2 px-4 rounded-md hover:bg-red"
+            className="text-black py-2 px-4 rounded-2xl hover:bg-red hover:text-white border-2"
           >
             Sair
           </button>
@@ -262,27 +295,27 @@ const MainPage: React.FC = () => {
               <p className="text-center">Nenhum evento encontrado.</p>
             ) : (
               events.map(event => (
-                <div key={event.id} className="border border-blue-mid p-2 rounded-md shadow-md shadow-blue-mid flex flex-col items-center">
+                <div key={event.id} className="border border-blue-mid p-4 rounded-md shadow-md shadow-blue-mid flex flex-col items-center w-full max-w-sm mx-auto">
                   <h3 className="text-xl mb-2 font-semibold text-center">{event.eventName}</h3>
                   {event.photo ? (
-                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className="h-1/4 rounded-md mb-2" />
+                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className="h-32 rounded-md mb-2" />
                   ) : (
                     <p>Foto do evento não disponível</p>
                   )}
-                  <p className="text-center mt-2 text-lg">{event.description}</p>
+                  <p className="text-center mt-2 text-base">{event.description}</p>
                   {event.qrCode && (
-                    <div className="w-2/4">
+                    <div className="w-full flex flex-col items-center mb-2">
                       <img
                         src={`http://localhost:8000${event.qrCode}`}
                         alt="QR Code do Evento"
-                        className="h-auto rounded-md cursor-pointer"
+                        className="h-32 rounded-md cursor-pointer"
                         onClick={() => openQrCodeImage(`http://localhost:8000${event.qrCode}`)}
                       />
                       <button
                         onClick={() => downloadImage(`http://localhost:8000${event.qrCode}`)}
-                        className="bg-green text-black py-2 px-3 rounded-md ml-10"
+                        className="bg-green text-black py-2 px-3 rounded-md mt-2"
                       >
-                        Baixar QR Code
+                        <FaDownload />
                       </button>
                     </div>
                   )}
@@ -299,47 +332,52 @@ const MainPage: React.FC = () => {
                     </div>
                   )}
                   <div className="flex justify-center w-full mt-4">
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
+                    <div className="grid grid-cols-4 gap-2 w-full">
                       <button
                         onClick={() => handleEditEvent(event.id)}
-                        className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue"
+                        className="bg-blue text-white p-2 rounded-md hover:bg-blue flex flex-col items-center"
                       >
-                        Editar
+                        <FaEdit />
+                        <span className="text-xs">Editar</span>
                       </button>
                       <button
                         onClick={() => handleDeleteEvent(event.id)}
-                        className="bg-red text-white py-2 px-4 rounded-md hover:bg-red"
+                        className="bg-red text-white p-2 rounded-md hover:bg-red flex flex-col items-center"
                       >
-                        Excluir
+                        <FaTrash />
+                        <span className="text-xs">Excluir</span>
                       </button>
                       <button
                         onClick={() => router.push(`/questions/${event.id}`)}
-                        className="bg-yellow text-white py-2 px-4 rounded-md hover:bg-yellow"
+                        className="bg-yellow text-white p-2 rounded-md hover:bg-yellow flex flex-col items-center"
                       >
-                        Manipular Perguntas
+                        <FaQuestion />
+                        <span className="text-xs">Perguntas</span>
                       </button>
                       <button
                         onClick={() => handleStartEvent(event.id)}
-                        className="bg-green text-white py-2 px-4 rounded-md hover:bg-green"
+                        className="bg-green text-white p-2 rounded-md hover:bg-green flex flex-col items-center"
                         disabled={!canAddEvent}
                       >
-                        Visualizar evento
+                        <FaEye />
+                        <span className="text-xs">Iniciar</span>
                       </button>
                     </div>
                   </div>
                   <button
                     onClick={() => router.push(`/past-events/${event.id}`)}
-                    className="bg-purple text-white py-2 px-4 rounded-md hover:bg-purple w-full mt-2"
+                    className="bg-purple text-white py-2 px-4 rounded-md hover:bg-purple w-full mt-2 flex flex-col items-center"
                     disabled={!event.existFilter}
                   >
-                    Visualizar Eventos Realizados
+                    <FaEye />
+                    <span className="text-xs">Eventos Realizados</span>
                   </button>
                 </div>
               ))
             )}
           </div>
         </div>
-        <div className="flex justify-center mt-4">
+        <div className="flex justify-center mt-8">
           <div className="w-full max-w-md mr-4">
             <label htmlFor="eventCode" className="block text-gray-700 font-bold mb-2">
               Código ou Link do Evento:

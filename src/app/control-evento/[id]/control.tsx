@@ -6,10 +6,18 @@ import 'react-toastify/dist/ReactToastify.css'
 import Cookies from 'universal-cookie'
 import { useParams, useRouter } from 'next/navigation'
 
+interface Answer {
+  id: string;
+  answer: string;
+  isCorrect: boolean;
+}
+
 interface Question {
   id: string;
   question: string;
   questionType: string;
+  options?: string[]; // Add options property
+  answers?: Answer[]; // Add answers property
 }
 
 interface Event {
@@ -33,9 +41,9 @@ const ControlEvento: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0)
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true)
   const [isEventStarted, setIsEventStarted] = useState(false)
-  const [filterId, setFilterId] = useState<string | undefined>()
+  const [filterId, setFilterId] = useState<string | undefined>(localStorage.getItem('filterId') || undefined)
   const router = useRouter()
-  
+
   const questionTypeTranslation: { [key: string]: string } = {
     open_short: 'Resposta curta',
     open_long: 'Resposta longa',
@@ -130,6 +138,7 @@ const ControlEvento: React.FC = () => {
       })
       const data = await response.json()
       if (response.ok) {
+        console.log(data.data)
         setQuestions(data.data)
         setIsLoadingQuestions(false)
 
@@ -242,9 +251,12 @@ const ControlEvento: React.FC = () => {
       const data = await response.json()
 
       if (response.ok) {
-        console.log(data)
         toast.success('evento iniciado com sucesso!')
         setFilterId(data.filterId)
+        localStorage.setItem('filterId', data.filterId)
+        fetchRegistrationCount() // Fetch registration count immediately after starting the event
+        const interval = setInterval(fetchRegistrationCount, 10000) // Continue fetching registration count periodically
+        return () => clearInterval(interval)
       } else {
         toast.error(data.message || 'Erro ao alterar a pergunta.')
       }
@@ -256,9 +268,10 @@ const ControlEvento: React.FC = () => {
 
   const handleEndEvent = async () => {
     const token = cookies.get('access')
+    const storedFilterId = filterId || localStorage.getItem('filterId')
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-      const response = await fetch(`${apiUrl}/end-event/${eventId}/${filterId}/`, {
+      const response = await fetch(`${apiUrl}/end-event/${eventId}/${storedFilterId}/`, {
         method: 'POST',
         headers: {
           'Authorization': `Bearer ${token}`,
@@ -269,6 +282,8 @@ const ControlEvento: React.FC = () => {
 
       if (response.ok) {
         toast.success('Evento encerrado com sucesso!')
+        localStorage.removeItem('filterId')
+        localStorage.removeItem('currentQuestionId')
         router.push(`/event-statistics/${eventId}`)
       } else {
         toast.error(data.message || 'Erro ao encerrar o evento.')
@@ -292,12 +307,12 @@ const ControlEvento: React.FC = () => {
     <>
       <ToastContainer />
       <div className="container mx-auto p-6">
-      <button
-                  onClick={handleGoBack}
-                  className="sm:absolute top-4 right-4 bg-gray-600 text-white py-2 px-4 rounded-md"
-                >
-                  Voltar
-                </button>
+        <button
+          onClick={handleGoBack}
+          className="sm:absolute top-4 right-4 bg-gray-600 text-white py-2 px-4 rounded-md hover:bg-gray-700 transition duration-300"
+        >
+          Voltar
+        </button>
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold text-gray-800">{event?.eventName || 'Carregando...'}</h1>
           <p className="text-lg text-gray-600">{event?.description}</p>
@@ -305,7 +320,7 @@ const ControlEvento: React.FC = () => {
             <img
               src={`http://localhost:8000${event.photo}`}
               alt="Foto do Evento"
-              className="sm:w-96 max-w-3xl mx-auto rounded-lg shadow-md mt-4"
+              className="sm:w-80 max-w-2xl mx-auto rounded-lg shadow-md mt-4"
             />
           )}
         </div>
@@ -325,16 +340,25 @@ const ControlEvento: React.FC = () => {
                     </span>
                   </div>
                 </div>
+                {questions[currentQuestionIndex]?.answers && (
+                  <ul className="mt-4 list-disc list-inside text-left">
+                    {questions[currentQuestionIndex].answers!.map((answer, index) => (
+                      <li key={index} className="text-gray-700">
+                        {answer.answer}
+                      </li>
+                    ))}
+                  </ul>
+                )}
                 <div className="mt-4 flex justify-center space-x-4">
                   <button
                     onClick={handlePreviousQuestion}
-                    className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue-thirth transition duration-300"
+                    className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue transition duration-300"
                   >
                     Pergunta Anterior
                   </button>
                   <button
                     onClick={handleNextQuestion}
-                    className="bg-green text-white py-2 px-4 rounded-md hover:bg-green-button transition duration-300"
+                    className="bg-green text-white py-2 px-4 rounded-md hover:bg-green transition duration-300"
                   >
                     Próxima Pergunta
                   </button>
@@ -344,7 +368,7 @@ const ControlEvento: React.FC = () => {
                 </div>
                 <button
                   onClick={() => setShowConfirmationModal(true)}
-                  className="bg-red text-white py-2 px-6 rounded-md hover:bg-orange-600 transition duration-300 mt-4"
+                  className="bg-red text-white py-2 px-6 rounded-md hover:bg-red transition duration-300 mt-4"
                 >
                   Encerrar Evento
                 </button>
@@ -372,19 +396,27 @@ const ControlEvento: React.FC = () => {
                           </span>
                         </div>
                       </div>
+                      {question.answers && (
+                        <ul className="mt-2 list-disc list-inside text-left">
+                          {question.answers.map((answer, index) => (
+                            <li key={index} className="text-gray-700">
+                              {answer.answer}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
                     </li>
                   ))}
                 </ul>
-                <div>
-                <button
-                  onClick={startEvent}
-                  className="bg-green text-white py-2 px-6 rounded-md hover:bg-green-dark transition duration-300 mt-4"
-                >
-                  Iniciar Evento
-                </button>
+                <div className="flex justify-center mt-4">
+                  <button
+                    onClick={startEvent}
+                    className="bg-green text-white py-2 px-6 rounded-md hover:bg-green transition duration-300"
+                  >
+                    Iniciar Evento
+                  </button>
                 </div>
               </>
-              
             )}
           </div>
         )}
@@ -398,13 +430,13 @@ const ControlEvento: React.FC = () => {
               <div className="flex justify-around">
                 <button
                   onClick={handleEndEvent}
-                  className="bg-green text-white py-2 px-6 rounded-md hover:bg-green-dark"
+                  className="bg-green text-white py-2 px-6 rounded-md hover:bg-green-600 transition duration-300"
                 >
                   Sim, encerrar
                 </button>
                 <button
                   onClick={() => setShowConfirmationModal(false)}
-                  className="bg-red text-white py-2 px-6 rounded-md hover:bg-red-600"
+                  className="bg-red text-white py-2 px-6 rounded-md hover:bg-red-600 transition duration-300"
                 >
                   Cancelar
                 </button>
