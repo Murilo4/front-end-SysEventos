@@ -140,7 +140,7 @@ const UserAccount = () => {
       console.log(data)
       if (data.success) {
         console.log('Dados atualizados com sucesso:', data);
-        setOriginalUserData(userData);x
+        setOriginalUserData(userData);
         toast.success(data.message || 'Dados atualizados com sucesso.');
       } else {
         console.error('Erro ao atualizar dados:', data);

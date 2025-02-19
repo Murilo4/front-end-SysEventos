@@ -51,7 +51,7 @@ const QuestionsPage: React.FC = () => {
   const [eventDetails, setEventDetails] = useState<EventData | null>(null) // Detalhes do evento
   const [questionImage, setQuestionImage] = useState<File | null>(null);
   const [previewURL, setPreviewURL] = useState<string | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null); 
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const cookies = useMemo(() => new Cookies(), [])
   const router = useRouter()
 
@@ -62,7 +62,7 @@ const QuestionsPage: React.FC = () => {
     multiple_choice: 'Múltiplas escolhas',
     single_choice: 'Escolha única',
   };
-  const fetchQuestions = useCallback (async () => {
+  const fetchQuestions = useCallback(async () => {
     setLoader(true)
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
@@ -93,7 +93,7 @@ const QuestionsPage: React.FC = () => {
     setLoader(false)
   }, [cookies, eventId])
 
-  const fetchEventDetails = useCallback( async () => {
+  const fetchEventDetails = useCallback(async () => {
     setLoader(true)
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
@@ -118,7 +118,7 @@ const QuestionsPage: React.FC = () => {
   }, [cookies, eventId])
 
   // Função para validar o token do usuário
-  const validateToken = useCallback ( async () => {
+  const validateToken = useCallback(async () => {
     const token = cookies.get('access')
 
     if (!token) {
@@ -165,7 +165,7 @@ const QuestionsPage: React.FC = () => {
     setEditingQuestion(null);
     setNewQuestion('');
     setOptions([]);
-    setQuestionType('open_short'); 
+    setQuestionType('open_short');
     setQuestionImage(null);
     setPreviewURL(null);
     if (fileInputRef.current) {
@@ -173,7 +173,7 @@ const QuestionsPage: React.FC = () => {
     }
     setIsCorrect(false); // Reset isCorrect
   };
-  
+
   const handleSaveQuestion = async () => {
     if (!newQuestion.trim()) {
       toast.warning('Por favor, insira uma pergunta.')
@@ -203,18 +203,18 @@ const QuestionsPage: React.FC = () => {
         toast.warning('Por favor, selecione uma imagem.');
         return;
       }
-  
+
       const formData = new FormData(); // Cria um objeto FormData
       formData.append('question', newQuestion);
       formData.append('questionType', questionType);
-  
+
       const answersArray = options.map(option => ({
         answer: option.answer,
         isCorrect: option.isCorrect
       }));
       formData.append('answers', JSON.stringify(answersArray));
       formData.append('photo', questionImage); // Adiciona a imagem ao FormData
-  
+
       await createQuestion(formData); // Envia o FormData
     }
     if (fileInputRef.current) {
@@ -314,7 +314,7 @@ const QuestionsPage: React.FC = () => {
         },
         body: formData,
       })
-  
+
       if (response.ok) {
         toast.success('Pergunta criada com sucesso!')
         setNewQuestion('') // Limpar o campo de nova pergunta
@@ -340,10 +340,10 @@ const QuestionsPage: React.FC = () => {
       toast.warning('Por favor, selecione uma imagem.');
       return;
     }
-  
+
     const formData = new FormData();
     formData.append('photo', questionImage);
-  
+
     try {
       const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
       const response = await fetch(`${apiUrl}/update-question-photo/${eventId}/${editingQuestion?.id}/`, { // Endpoint específico para a imagem
@@ -353,7 +353,7 @@ const QuestionsPage: React.FC = () => {
         },
         body: formData,
       });
-  
+
       if (response.ok) {
         toast.success('Foto atualizada com sucesso!');
         fetchQuestions(); // Atualiza a lista de perguntas para exibir a nova imagem
@@ -369,41 +369,41 @@ const QuestionsPage: React.FC = () => {
   const handleDeleteOption = async (optionId: string) => {
     setLoader(true);
     try {
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
 
-        const indexToDelete = options.findIndex(option => option.id === optionId);
+      const indexToDelete = options.findIndex(option => option.id === optionId);
 
-        if (indexToDelete !== -1) {
-            const optionToDelete = options[indexToDelete];
+      if (indexToDelete !== -1) {
+        const optionToDelete = options[indexToDelete];
 
-            // Verifica se optionToDelete.id é definido e é uma string antes de usar startsWith
-            if (typeof optionToDelete.id === 'string' && optionToDelete.id.startsWith("temp")) {
-                setOptions(options.filter((_, index) => index !== indexToDelete));
+        // Verifica se optionToDelete.id é definido e é uma string antes de usar startsWith
+        if (typeof optionToDelete.id === 'string' && optionToDelete.id.startsWith("temp")) {
+          setOptions(options.filter((_, index) => index !== indexToDelete));
+        } else {
+          if (editingQuestion) {
+            const response = await fetch(`${apiUrl}/delete-answer/${eventId}/${optionId}/`, {
+              method: 'DELETE',
+              headers: {
+                'Authorization': `Bearer ${cookies.get('access')}`,
+              },
+            });
+
+            if (response.ok) {
+              setOptions(options.filter((_, index) => index !== indexToDelete));
+              toast.success('Opção excluída com sucesso!');
             } else {
-                if (editingQuestion) {
-                    const response = await fetch(`${apiUrl}/delete-answer/${eventId}/${optionId}/`, {
-                        method: 'DELETE',
-                        headers: {
-                            'Authorization': `Bearer ${cookies.get('access')}`,
-                        },
-                    });
-
-                    if (response.ok) {
-                        setOptions(options.filter((_, index) => index !== indexToDelete));
-                        toast.success('Opção excluída com sucesso!');
-                    } else {
-                        toast.error('Erro ao excluir opção.');
-                    }
-                }
+              toast.error('Erro ao excluir opção.');
             }
+          }
         }
+      }
     } catch (error) {
-        console.error('Erro ao excluir opção:', error);
-        toast.error('Erro ao excluir opção. Tente novamente mais tarde.');
+      console.error('Erro ao excluir opção:', error);
+      toast.error('Erro ao excluir opção. Tente novamente mais tarde.');
     } finally {
-        setLoader(false);
+      setLoader(false);
     }
-};
+  };
 
   const handleDeleteQuestion = async (questionId: string) => {
     setLoader(true)
@@ -421,13 +421,13 @@ const QuestionsPage: React.FC = () => {
         setEditingQuestion(null);
         setNewQuestion('');
         setOptions([]);
-        setQuestionType('open_short'); 
+        setQuestionType('open_short');
         setQuestionImage(null);
         setPreviewURL(null);
         if (fileInputRef.current) {
           fileInputRef.current.value = '';
         }
-    setIsCorrect(false); // Reset isCorrect
+        setIsCorrect(false); // Reset isCorrect
         toast.success('Pergunta excluída com sucesso!')
       } else {
         toast.error('Erro ao excluir pergunta.')
@@ -446,7 +446,7 @@ const QuestionsPage: React.FC = () => {
         answer: newOption,
         isCorrect: isCorrect, // Usa o estado isCorrect para o valor inicial
       };
-  
+
       if (questionType === 'single_choice') {
         // Lógica para "Escolha Única"
         if (options.some(option => option.isCorrect)) {
@@ -456,7 +456,7 @@ const QuestionsPage: React.FC = () => {
           // Se não houver nenhuma opção correta, permite marcar como correta (se `isCorrect` for true)
         }
       }
-  
+
       setOptions(prevOptions => [...prevOptions, newOptionObject]);
       setNewOption(''); // Limpar o campo de nova opção
       setIsCorrect(false); // Reseta o estado isCorrect após adicionar a opção
@@ -483,7 +483,6 @@ const QuestionsPage: React.FC = () => {
             )}
           </div>
         )}
-
         <div className="absolute top-4 right-1 flex space-x-4 sm:flex-col sm:space-x-0 sm:space-y-2 z-10">
           <button
             onClick={() => router.push('/main-page')}
@@ -521,36 +520,36 @@ const QuestionsPage: React.FC = () => {
 
           {/* Campos para opções (para perguntas fechadas) */}
           {(questionType === 'multiple_choice' || questionType === 'single_choice') && (
-          <div className="mt-2">
-            <input
-              type="text"
-              value={newOption}
-              onChange={(e) => setNewOption(e.target.value)}
-              placeholder="Adicionar uma opção"
-              className="border p-2 rounded-md w-2/3 border-slate-500 shadow-sm shadow-slate-400"
-            />
-            <button
-              onClick={handleAddOption}
-              className="bg-blue text-white py-2 px-4 rounded-md ml-4 shadow-sm shadow-slate-400"
-            >
-              Adicionar Opção
-            </button>
             <div className="mt-2">
-              <label className="mr-4">Marcar a opção como correta:</label>
               <input
-                type="checkbox"
-                checked={isCorrect}
-                onChange={() => {
-                  if (questionType === 'multiple_choice' || !options.some(option => option.isCorrect)) {
-                    setIsCorrect(!isCorrect);
-                  }
-                }}
-                disabled={questionType === 'single_choice' && options.some(option => option.isCorrect)}
+                type="text"
+                value={newOption}
+                onChange={(e) => setNewOption(e.target.value)}
+                placeholder="Adicionar uma opção"
+                className="border p-2 rounded-md w-2/3 border-slate-500 shadow-sm shadow-slate-400"
               />
-            </div>
+              <button
+                onClick={handleAddOption}
+                className="bg-blue text-white py-2 px-4 rounded-md ml-4 shadow-sm shadow-slate-400"
+              >
+                Adicionar Opção
+              </button>
+              <div className="mt-2">
+                <label className="mr-4">Marcar a opção como correta:</label>
+                <input
+                  type="checkbox"
+                  checked={isCorrect}
+                  onChange={() => {
+                    if (questionType === 'multiple_choice' || !options.some(option => option.isCorrect)) {
+                      setIsCorrect(!isCorrect);
+                    }
+                  }}
+                  disabled={questionType === 'single_choice' && options.some(option => option.isCorrect)}
+                />
+              </div>
 
-            {/* Mostrar lista de opções com botão de "remover" */}
-            {options.length > 0 && (
+              {/* Mostrar lista de opções com botão de "remover" */}
+              {options.length > 0 && (
                 <div className="mt-2 flex justify-center"> {/* Centraliza o container */}
                   <div className="grid grid-cols-2 gap-2"> {/* Grid de 2 colunas */}
                     {options.map((option, index) => (
@@ -567,95 +566,105 @@ const QuestionsPage: React.FC = () => {
                   </div>
                 </div>
               )}
-          </div>
-        )}
+            </div>
+          )}
         </div>
+
         <div className="mt-4 flex flex-col items-center"> {/* Centraliza a imagem e os botões */}
-      <label htmlFor="image-upload" className="block mb-2">Imagem da Pergunta (Max 2MB):</label>
-      <input
-        type="file"
-        id="image-upload"
-        accept="image/*"
-        onChange={handleImageChange}
-        ref={fileInputRef}
-        className="border p-2 rounded-md w-2/3 border-slate-400 shadow-sm shadow-slate-400"
-      />
+          <label htmlFor="image-upload" className="block mb-2">Imagem da Pergunta (Max 2MB):</label>
+          <input
+            type="file"
+            id="image-upload"
+            accept="image/*"
+            onChange={handleImageChange}
+            ref={fileInputRef}
+            className="border p-2 rounded-md w-2/3 border-slate-400 shadow-sm shadow-slate-400"
+          />
 
-      <div className="flex justify-center">
-        {previewURL && (
-          <img src={previewURL} alt="Pré-visualização da Imagem" className="mt-2 w-72 rounded-md justify-center flex content-center" />
-        )}
-      </div>
+          <div className="flex justify-center">
+            {previewURL && (
+              <img src={previewURL} alt="Pré-visualização da Imagem" className="mt-2 w-72 rounded-md justify-center flex content-center" />
+            )}
+          </div>
 
-      {editingQuestion && (
-        <button
-          onClick={handleUpdateImage}
-          className="bg-blue text-white py-2 px-4 rounded-md mt-2"
-          disabled={!questionImage}
-        >
-          Atualizar Foto
-        </button>
-      )}
-
-      <div className="flex space-x-4 mt-2 mb-10"> {/* Centraliza os botões e adiciona espaçamento */}
-        <button
-          onClick={handleSaveQuestion}
-          className="bg-blue text-white py-2 px-4 rounded-md"
-        >
-          {editingQuestion ? 'Salvar Pergunta' : 'Adicionar Pergunta'}
-        </button>
-        {editingQuestion && (
-          <button
-            onClick={handleCancelEdit}
-            className="bg-gray-400 text-white py-2 px-4 rounded-md"
-          >
-            Cancelar Edição
-          </button>
-        )}
-      </div>
-    </div>
-    {loader ? (
-  <p>Carregando perguntas...</p>
-) : questions.length === 0 ? (
-  <p className="text-center">Nenhuma pergunta encontrada.</p>
-) : (
-  <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-    {questions.map((question, index) => (
-      <div key={question.id || index} className="border bg-slate-300 p-4 rounded-md shadow-md flex flex-row  shadow-slate-400">
-        <div className="w-full mr-4">
-          <p><strong>Tipo da pergunta:</strong>  {questionTypeTranslation[question.questionType] || 'Tipo desconhecido'}</p>
-          <p className="text-xl"><strong>Pergunta:</strong> {question.question}</p>
-          {question.questionType === 'multiple_choice' || question.questionType === 'single_choice' ? (
-            <ul>
-              {question.answers?.map((option, idx) => (
-                <li key={idx}>
-                  {option.answer} {option.isCorrect ? '(Correta)' : '(Errada)'}
-                </li>
-              ))}
-            </ul>
-          ) : null}
-          <div className="flex justify-center w-full mt-4">
+          {editingQuestion && (
             <button
-              onClick={() => handleEditQuestion(question)}
-              className="bg-yellow text-white py-2 px-4 rounded-md hover:bg-yellow mr-2"
+              onClick={handleUpdateImage}
+              className="bg-blue text-white py-2 px-4 rounded-md mt-2"
+              disabled={!questionImage}
             >
-              Editar
+              Atualizar Foto
             </button>
+          )}
+
+          <div className="flex space-x-4 mt-2 mb-10"> {/* Centraliza os botões e adiciona espaçamento */}
             <button
-              onClick={() => handleDeleteQuestion(question.id)}
-              className="bg-red text-white py-2 px-4 rounded-md hover:bg-red"
+              onClick={handleSaveQuestion}
+              className="bg-blue text-white py-2 px-4 rounded-md"
             >
-              Excluir
+              {editingQuestion ? 'Salvar Pergunta' : 'Adicionar Pergunta'}
             </button>
+            {editingQuestion && (
+              <button
+                onClick={handleCancelEdit}
+                className="bg-gray-400 text-white py-2 px-4 rounded-md"
+              >
+                Cancelar Edição
+              </button>
+            )}
           </div>
         </div>
-        {question.photo && (
-          <img src={`http://localhost:8000${question.photo}`} alt="Pergunta" className="w-20 h-28 object-fill sm:w-52 sm:max-h-48 rounded-md" />
+        <div className="flex justify-center mt-4">
+          <button
+            onClick={() => router.push('/search-questions')}
+            className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue w-1/2 lg:w-1/3 mb-4"
+          >
+            Buscar Perguntas de Outros Eventos
+          </button>
+        </div>
+
+        {loader ? (
+          <p>Carregando perguntas...</p>
+        ) : questions.length === 0 ? (
+          <p className="text-center">Nenhuma pergunta encontrada.</p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
+            {questions.map((question, index) => (
+              <div key={question.id || index} className="border bg-slate-300 p-4 rounded-md shadow-md flex flex-row  shadow-slate-400">
+                <div className="w-full mr-4">
+                  <p><strong>Tipo da pergunta:</strong>  {questionTypeTranslation[question.questionType] || 'Tipo desconhecido'}</p>
+                  <p className="text-xl"><strong>Pergunta:</strong> {question.question}</p>
+                  {question.questionType === 'multiple_choice' || question.questionType === 'single_choice' ? (
+                    <ul>
+                      {question.answers?.map((option, idx) => (
+                        <li key={idx}>
+                          {option.answer} {option.isCorrect ? '(Correta)' : '(Errada)'}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                  <div className="flex justify-center w-full mt-4">
+                    <button
+                      onClick={() => handleEditQuestion(question)}
+                      className="bg-yellow text-white py-2 px-4 rounded-md hover:bg-yellow mr-2"
+                    >
+                      Editar
+                    </button>
+                    <button
+                      onClick={() => handleDeleteQuestion(question.id)}
+                      className="bg-red text-white py-2 px-4 rounded-md hover:bg-red"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </div>
+                {question.photo && (
+                  <img src={`http://localhost:8000${question.photo}`} alt="Pergunta" className="w-20 h-28 object-fill sm:w-52 sm:max-h-48 rounded-md" />
+                )}
+              </div>
+            ))}
+          </div>
         )}
-      </div>
-    ))}
-  </div>
-)}
       </div>
     </>
   )
