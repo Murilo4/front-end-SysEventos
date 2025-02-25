@@ -5,10 +5,12 @@ import { useRouter } from 'next/navigation'
 import { toast, ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import Cookies from 'universal-cookie'
+import debounce from 'lodash.debounce'
 
 interface Option {
     id: number;
     text: string;
+    isCorrect: boolean;
 }
 
 interface Question {
@@ -16,7 +18,7 @@ interface Question {
     question_text: string;
     question_type: string;
     options: Option[];
-    events: { id: string }[]; // Update events to be an array of objects with id
+    events: { id: string }[];
 }
 
 interface Event {
@@ -50,14 +52,19 @@ const SearchQuestionsPage: React.FC = () => {
     const [selectedEvents, setSelectedEvents] = useState<string[]>([])
     const [includeOptions, setIncludeOptions] = useState<boolean>(false)
     const [loading, setLoading] = useState<boolean>(false)
+    const [currentPage, setCurrentPage] = useState<number>(1)
+    const [hasNext, setHasNext] = useState<boolean>(false)
+    const [hasBack, setHasBack] = useState<boolean>(false)
+    const [totalPages, setTotalPages] = useState<number>(1)
+    const questionsPerPage = 12
     const cookies = useMemo(() => new Cookies(), [])
     const router = useRouter()
 
-    const fetchQuestions = useCallback(async (filterType: string) => {
+    const fetchQuestions = useCallback(async (filterType: string, page: number = 1, search: string = '') => {
         setLoading(true)
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-            const response = await fetch(`${apiUrl}/get-questions-user/${filterType}/`, {
+            const response = await fetch(`${apiUrl}/get-questions-user/${filterType}/?page=${page}&search=${search}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${cookies.get('access')}`,
@@ -67,6 +74,9 @@ const SearchQuestionsPage: React.FC = () => {
             if (response.ok && data.success) {
                 setQuestions(data.data.questions)
                 setFilteredQuestions(data.data.questions)
+                setHasNext(data.data.hasNext)
+                setHasBack(data.data.hasBack)
+                setTotalPages(data.data.totalPages)
             } else {
                 toast.error('Erro ao carregar perguntas')
             }
@@ -105,12 +115,12 @@ const SearchQuestionsPage: React.FC = () => {
         fetchEvents()
     }, [fetchQuestions, fetchEvents])
 
+    const debouncedFetchQuestions = useMemo(() => debounce(fetchQuestions, 1200), [fetchQuestions])
+
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value)
-        const filtered = questions.filter(question =>
-            question.question_text.toLowerCase().includes(e.target.value.toLowerCase())
-        )
-        setFilteredQuestions(filtered)
+        debouncedFetchQuestions(filter.user && filter.others ? 'all' : filter.user ? 'user' : 'others', 1, e.target.value)
+        setCurrentPage(1)
     }
 
     const handleFilterChange = (filterType: 'user' | 'others') => {
@@ -118,14 +128,15 @@ const SearchQuestionsPage: React.FC = () => {
         setFilter(newFilter)
 
         if (newFilter.user && newFilter.others) {
-            fetchQuestions('all')
+            fetchQuestions('all', 1, searchTerm)
         } else if (newFilter.user) {
-            fetchQuestions('user')
+            fetchQuestions('user', 1, searchTerm)
         } else if (newFilter.others) {
-            fetchQuestions('others')
+            fetchQuestions('others', 1, searchTerm)
         } else {
             setFilteredQuestions([])
         }
+        setCurrentPage(1)
     }
 
     const handleAddQuestionToEvent = (question: Question) => {
@@ -176,6 +187,37 @@ const SearchQuestionsPage: React.FC = () => {
 
     const canAddQuestionToAnyEvent = (question: Question) => {
         return events.some(event => !question.events.some(e => e.id === event.id))
+    }
+
+    const renderOptions = (question: Question) => {
+        if (question.question_type === 'multiple_choice' || question.question_type === 'single_choice') {
+            const allCorrect = question.options.every(option => option.isCorrect)
+            const allIncorrect = question.options.every(option => !option.isCorrect)
+            return (
+                <ul className="list-disc list-inside mb-2">
+                    {question.options.map((option) => (
+                        <li key={option.id} className={allCorrect || allIncorrect ? 'text-gray-600' : option.isCorrect ? 'text-green-600' : 'text-red-600'}>
+                            {option.text} {allCorrect || allIncorrect ? '(Sem opção correta)' : option.isCorrect ? '(Correta)' : '(Errada)'}
+                        </li>
+                    ))}
+                </ul>
+            )
+        }
+        return null
+    }
+
+    const filteredQuestionsToShow = filteredQuestions.filter(question => {
+        const isAddedToAllEvents = !canAddQuestionToAnyEvent(question)
+        return filter.user || !isAddedToAllEvents
+    })
+
+    const indexOfLastQuestion = currentPage * questionsPerPage
+    const indexOfFirstQuestion = indexOfLastQuestion - questionsPerPage
+    const currentQuestions = filteredQuestionsToShow.slice(indexOfFirstQuestion, indexOfLastQuestion)
+
+    const paginate = (pageNumber: number) => {
+        setCurrentPage(pageNumber)
+        fetchQuestions(filter.user && filter.others ? 'all' : filter.user ? 'user' : 'others', pageNumber, searchTerm)
     }
 
     return (
@@ -229,22 +271,16 @@ const SearchQuestionsPage: React.FC = () => {
                     </div>
                     <div className="w-3/4 p-4">
                         <h2 className="text-xl font-semibold mb-4">Perguntas</h2>
-                        {filteredQuestions.length === 0 ? (
+                        {currentQuestions.length === 0 ? (
                             <p className="text-center">Nenhuma pergunta encontrada.</p>
                         ) : (
                             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                                {filteredQuestions.map((question) => (
+                                {currentQuestions.map((question) => (
                                     <div key={question.question_id} className="border p-4 rounded-md shadow-md flex flex-col justify-between">
                                         <div>
                                             <h3 className="text-lg font-semibold mb-2">{question.question_text}</h3>
                                             <p className="text-sm mb-2"><strong>Tipo:</strong> {questionTypeTranslation[question.question_type]}</p>
-                                            {question.options.length > 0 && (
-                                                <ul className="list-disc list-inside mb-2">
-                                                    {question.options.map((option) => (
-                                                        <li key={option.id}>{option.text}</li>
-                                                    ))}
-                                                </ul>
-                                            )}
+                                            {renderOptions(question)}
                                         </div>
                                         <button
                                             onClick={() => handleAddQuestionToEvent(question)}
@@ -257,6 +293,40 @@ const SearchQuestionsPage: React.FC = () => {
                                 ))}
                             </div>
                         )}
+                        <div className="flex justify-center mt-4">
+                            <nav>
+                                <ul className="flex list-none">
+                                    <li className="mx-1">
+                                        <button
+                                            onClick={() => paginate(currentPage - 1)}
+                                            className={`py-2 px-4 rounded-md ${hasBack ? 'bg-blue text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
+                                            disabled={!hasBack}
+                                        >
+                                            Anterior
+                                        </button>
+                                    </li>
+                                    {Array.from({ length: totalPages }, (_, index) => (
+                                        <li key={index} className="mx-1">
+                                            <button
+                                                onClick={() => paginate(index + 1)}
+                                                className={`py-2 px-4 rounded-md ${currentPage === index + 1 ? 'bg-blue text-white' : 'bg-gray-200 text-gray-700'}`}
+                                            >
+                                                {index + 1}
+                                            </button>
+                                        </li>
+                                    ))}
+                                    <li className="mx-1">
+                                        <button
+                                            onClick={() => paginate(currentPage + 1)}
+                                            className={`py-2 px-4 rounded-md ${hasNext ? 'bg-blue text-white' : 'bg-gray-200 text-gray-700 cursor-not-allowed'}`}
+                                            disabled={!hasNext}
+                                        >
+                                            Próxima
+                                        </button>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
 
