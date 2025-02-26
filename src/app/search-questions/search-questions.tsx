@@ -46,7 +46,23 @@ const SearchQuestionsPage: React.FC = () => {
     const [questions, setQuestions] = useState<Question[]>([])
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('')
+
     const [filter, setFilter] = useState<{ user: boolean; others: boolean }>({ user: true, others: true })
+    const [tempFilter, setTempFilter] = useState<{ user: boolean; others: boolean }>({ user: true, others: true })
+
+    const [questionTypes, setQuestionTypes] = useState<{ [key: string]: boolean }>({
+        open_short: true,
+        open_long: true,
+        multiple_choice: true,
+        single_choice: true,
+    })
+    const [tempQuestionTypes, setTempQuestionTypes] = useState<{ [key: string]: boolean }>({
+        open_short: true,
+        open_long: true,
+        multiple_choice: true,
+        single_choice: true,
+    })
+
     const [events, setEvents] = useState<Event[]>([])
     const [selectedQuestion, setSelectedQuestion] = useState<Question | null>(null)
     const [selectedEvents, setSelectedEvents] = useState<string[]>([])
@@ -60,11 +76,12 @@ const SearchQuestionsPage: React.FC = () => {
     const cookies = useMemo(() => new Cookies(), [])
     const router = useRouter()
 
-    const fetchQuestions = useCallback(async (filterType: string, page: number = 1, search: string = '') => {
+    const fetchQuestions = useCallback(async (filterType: string, page: number = 1, search: string = '', types: string[] = []) => {
         setLoading(true)
         try {
             const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
-            const response = await fetch(`${apiUrl}/get-questions-user/${filterType}/?page=${page}&search=${search}`, {
+            const typesQuery = types.length > 0 ? `&types=${types.join(',')}` : ''
+            const response = await fetch(`${apiUrl}/get-questions-user/${filterType}/?page=${page}&search=${search}${typesQuery}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': `Bearer ${cookies.get('access')}`,
@@ -111,28 +128,41 @@ const SearchQuestionsPage: React.FC = () => {
     }, [cookies])
 
     useEffect(() => {
-        fetchQuestions('all')
+        const initialTypes = Object.keys(questionTypes).filter(type => questionTypes[type])
+        fetchQuestions('all', 1, '', initialTypes)
         fetchEvents()
-    }, [fetchQuestions, fetchEvents])
+    }, [fetchQuestions, fetchEvents, questionTypes])
 
     const debouncedFetchQuestions = useMemo(() => debounce(fetchQuestions, 1200), [fetchQuestions])
 
     const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
         setSearchTerm(e.target.value)
-        debouncedFetchQuestions(filter.user && filter.others ? 'all' : filter.user ? 'user' : 'others', 1, e.target.value)
+        const selectedTypes = Object.keys(questionTypes).filter(type => questionTypes[type])
+        debouncedFetchQuestions(filter.user && filter.others ? 'all' : filter.user ? 'user' : 'others', 1, e.target.value, selectedTypes)
         setCurrentPage(1)
     }
 
-    const handleFilterChange = (filterType: 'user' | 'others') => {
-        const newFilter = { ...filter, [filterType]: !filter[filterType] }
-        setFilter(newFilter)
+    const handleTempFilterChange = (filterType: 'user' | 'others') => {
+        const newFilter = { ...tempFilter, [filterType]: !tempFilter[filterType] }
+        setTempFilter(newFilter)
+    }
 
-        if (newFilter.user && newFilter.others) {
-            fetchQuestions('all', 1, searchTerm)
-        } else if (newFilter.user) {
-            fetchQuestions('user', 1, searchTerm)
-        } else if (newFilter.others) {
-            fetchQuestions('others', 1, searchTerm)
+    const handleTempQuestionTypeChange = (type: string) => {
+        const newQuestionTypes = { ...tempQuestionTypes, [type]: !tempQuestionTypes[type] }
+        setTempQuestionTypes(newQuestionTypes)
+    }
+
+    const applyFilters = () => {
+        setFilter(tempFilter)
+        setQuestionTypes(tempQuestionTypes)
+
+        const selectedTypes = Object.keys(tempQuestionTypes).filter(type => tempQuestionTypes[type])
+        if (tempFilter.user && tempFilter.others) {
+            fetchQuestions('all', 1, searchTerm, selectedTypes)
+        } else if (tempFilter.user) {
+            fetchQuestions('user', 1, searchTerm, selectedTypes)
+        } else if (tempFilter.others) {
+            fetchQuestions('others', 1, searchTerm, selectedTypes)
         } else {
             setFilteredQuestions([])
         }
@@ -217,7 +247,8 @@ const SearchQuestionsPage: React.FC = () => {
 
     const paginate = (pageNumber: number) => {
         setCurrentPage(pageNumber)
-        fetchQuestions(filter.user && filter.others ? 'all' : filter.user ? 'user' : 'others', pageNumber, searchTerm)
+        const selectedTypes = Object.keys(questionTypes).filter(type => questionTypes[type])
+        fetchQuestions(filter.user && filter.others ? 'all' : filter.user ? 'user' : 'others', pageNumber, searchTerm, selectedTypes)
     }
 
     return (
@@ -252,8 +283,8 @@ const SearchQuestionsPage: React.FC = () => {
                             <div className="flex items-center mb-2">
                                 <input
                                     type="checkbox"
-                                    checked={filter.user}
-                                    onChange={() => handleFilterChange('user')}
+                                    checked={tempFilter.user}
+                                    onChange={() => handleTempFilterChange('user')}
                                     className="mr-2"
                                 />
                                 <label>Minhas Perguntas</label>
@@ -261,13 +292,33 @@ const SearchQuestionsPage: React.FC = () => {
                             <div className="flex items-center">
                                 <input
                                     type="checkbox"
-                                    checked={filter.others}
-                                    onChange={() => handleFilterChange('others')}
+                                    checked={tempFilter.others}
+                                    onChange={() => handleTempFilterChange('others')}
                                     className="mr-2"
                                 />
                                 <label>Perguntas de Outros Usuários</label>
                             </div>
                         </div>
+                        <div className="mb-4">
+                            <label className="block mb-2">Tipo de Pergunta:</label>
+                            {Object.keys(questionTypeTranslation).map((type) => (
+                                <div key={type} className="flex items-center mb-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={tempQuestionTypes[type]}
+                                        onChange={() => handleTempQuestionTypeChange(type)}
+                                        className="mr-2"
+                                    />
+                                    <label>{questionTypeTranslation[type]}</label>
+                                </div>
+                            ))}
+                        </div>
+                        <button
+                            onClick={applyFilters}
+                            className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue-600 transition duration-300"
+                        >
+                            Aplicar Filtros
+                        </button>
                     </div>
                     <div className="w-3/4 p-4">
                         <h2 className="text-xl font-semibold mb-4">Perguntas</h2>

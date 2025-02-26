@@ -246,11 +246,13 @@ const MainPage: React.FC = () => {
             onClick={() => router.push('/meu-perfil')}
             className="flex items-center space-x-2 cursor-pointer border-2 text-black py-2 px-4 rounded-2xl hover:bg-blue-mid hover:text-white"
           >
-            <img
-              src={userData.photo}
-              alt="Foto do usuário"
-              className="w-8 h-8 rounded-full"
-            />
+            {userData.photo && (
+              <img
+                src={userData.photo}
+                alt="Foto do usuário"
+                className="w-8 h-8 rounded-full"
+              />
+            )}
             <span>{userData.username}</span>
           </div>
           <button
@@ -404,12 +406,14 @@ const MainPage: React.FC = () => {
           </button>
         </div>
 
-        <button
-          onClick={() => setIsQrCodeVisible(true)}
-          className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded flex justify-center"
-        >
-          Escanear QR Code
-        </button>
+        <div className="flex justify-center mt-8"> {/* Center the button */}
+          <button
+            onClick={() => setIsQrCodeVisible(true)}
+            className="bg-green-500 hover:bg-green-700 text-black font-bold py-2 px-4 rounded"
+          >
+            Escanear QR Code
+          </button>
+        </div>
 
         {isQrCodeVisible && (
           <div className="fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex justify-center items-center z-20" onClick={() => setIsQrCodeVisible(false)}>

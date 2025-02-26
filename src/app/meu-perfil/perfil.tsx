@@ -8,7 +8,7 @@ import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const UserAccount = () => {
-  const [image, setImage] = useState<string>('/foto-padrao.png'); // Foto padrão inicialmente
+  const [image, setImage] = useState<string | null>('/foto-padrao.png'); // Foto padrão inicialmente
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
   const [isImageChanged, setIsImageChanged] = useState<boolean>(false);
@@ -137,7 +137,6 @@ const UserAccount = () => {
         body: JSON.stringify(userData)
       });
       const data = await response.json();
-      console.log(data)
       if (data.success) {
         console.log('Dados atualizados com sucesso:', data);
         setOriginalUserData(userData);
@@ -292,13 +291,15 @@ const UserAccount = () => {
         <div className="flex justify-center w-full sm:w-1/4 md:w-1/3">
           <div className="relative w-60 h-60 mb-8">
             <div className="w-full h-full rounded-full overflow-hidden">
-              <Image
-                src={image}
-                alt="Foto de perfil"
-                width={240}
-                height={240}
-                className="object-cover w-full h-full"
-              />
+              {image && (
+                <Image
+                  src={image}
+                  alt="Foto de perfil"
+                  width={240}
+                  height={240}
+                  className="object-cover w-full h-full"
+                />
+              )}
             </div>
             <div className="absolute bottom-0 right-0 mb-2 mr-2 z-10">
               <button
