@@ -1,13 +1,31 @@
-'use client'
+'use client';
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Cookies from 'universal-cookie';
 
-// Extend the Window interface to include MercadoPago
+interface MercadoPagoOptions {
+  locale: string; // Add other options as needed
+}
+
+interface MercadoPago {
+  init: (options: MercadoPagoOptions) => void;
+  checkout: (options: {
+    preference: { id: string };
+    render: {
+      container: string;
+      label: string;
+    };
+  }) => void; // Method to initialize
+}
+
+interface MercadoPagoConstructor {
+  new (publicKey: string, options: MercadoPagoOptions): MercadoPago;
+}
+
 declare global {
   interface Window {
-    MercadoPago: any;
+    MercadoPago: MercadoPagoConstructor; // Use the constructor interface
   }
 }
 
@@ -40,9 +58,15 @@ const PaymentPage = () => {
   }, [id]);
 
   useEffect(() => {
+    const publicKey = process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY;
+    if (!publicKey) {
+      console.error("Missing Mercado Pago public key");
+      return; // Handle the error appropriately
+    }
+    
     if (preferenceId) {
       const initializeMercadoPago = () => {
-        const mp = new window.MercadoPago(process.env.NEXT_PUBLIC_MERCADO_PAGO_PUBLIC_KEY, {
+        const mp = new window.MercadoPago(publicKey, {
           locale: 'pt-BR'
         });
 
