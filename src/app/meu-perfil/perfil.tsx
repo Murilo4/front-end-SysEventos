@@ -96,32 +96,39 @@ const UserAccount = () => {
   };
 
   const handleSaveImage = async () => {
-    try {
-      const cookies = new Cookies();
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
-      const formData = new FormData();
-      formData.append('photo', fileInputRef.current?.files?.[0] as Blob);
+  try {
+    const cookies = new Cookies();
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const file = fileInputRef.current?.files?.[0]; // Get the file safely
 
-      const response = await fetch(`${apiUrl}/update-user-photo/`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${cookies.get('access')}`
-        },
-        body: formData
-      });
-
-      const data = await response.json();
-      if (data.success) {
-        toast.success('Foto de perfil atualizada com sucesso.');
-        setImage(URL.createObjectURL(fileInputRef.current?.files?.[0]!)); // Atualiza a imagem com a nova foto
-      } else {
-        toast.error(data.message || 'Erro ao atualizar foto.');
-      }
-    } catch (error) {
-      console.error('Erro ao enviar foto:', error);
-      toast.error('Erro ao enviar foto.');
+    if (!file) {
+      toast.error('Por favor, selecione uma imagem.');
+      return; // Exit if no file is selected
     }
-  };
+
+    const formData = new FormData();
+    formData.append('photo', file as Blob);
+
+    const response = await fetch(`${apiUrl}/update-user-photo/`, {
+      method: 'PUT',
+      headers: {
+        'Authorization': `Bearer ${cookies.get('access')}`
+      },
+      body: formData
+    });
+
+    const data = await response.json();
+    if (data.success) {
+      toast.success('Foto de perfil atualizada com sucesso.');
+      setImage(URL.createObjectURL(file)); // Update image with the new photo
+    } else {
+      toast.error(data.message || 'Erro ao atualizar foto.');
+    }
+  } catch (error) {
+    console.error('Erro ao enviar foto:', error);
+    toast.error('Erro ao enviar foto.');
+  }
+};
 
   const handleSaveClick = async (e: React.FormEvent) => {
     e.preventDefault(); // Prevent form submission from refreshing the page
