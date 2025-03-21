@@ -111,7 +111,7 @@ const MainPage: React.FC = () => {
       if (data.success) {
         setUserData({
           username: data.userData.username,
-          photo: data.userData.photo ? `http://localhost:8000${data.userData.photo}` : '/foto-padrao.png'
+          photo: data.userData.photo ? `${image_url}${data.userData.photo}` : '/foto-padrao.png'
         });
       }
     } catch (error) {
