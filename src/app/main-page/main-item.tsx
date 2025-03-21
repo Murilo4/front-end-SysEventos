@@ -28,6 +28,7 @@ const MainPage: React.FC = () => {
   const [isQrCodeVisible, setIsQrCodeVisible] = useState<boolean>(false)
   const videoRef = useRef<HTMLVideoElement | null>(null)
   const router = useRouter()
+  const image_url = process.env.NEXT_PUBLIC_API_BASE_URL
   const [userData, setUserData] = useState({
     username: '',
     photo: ''
@@ -45,7 +46,7 @@ const MainPage: React.FC = () => {
       return
     }
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/validate-token/`, {
         method: 'POST',
         headers: {
@@ -76,7 +77,7 @@ const MainPage: React.FC = () => {
   const fetchEvents = useCallback(async () => {
     setLoader(true)
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/get-all-events/`, {
         method: 'GET',
         headers: {
@@ -98,7 +99,7 @@ const MainPage: React.FC = () => {
 
   const fetchUserData = useCallback(async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL';
       const response = await fetch(`${apiUrl}/user-profile/`, {
         method: 'GET',
         headers: {
@@ -132,7 +133,7 @@ const MainPage: React.FC = () => {
   const handleDeleteEvent = async (eventId: string) => {
     setLoader(true)
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/delete-event/${eventId}/`, {
         method: 'DELETE',
         headers: {
@@ -280,7 +281,7 @@ const MainPage: React.FC = () => {
                 <div key={event.id} className="border border-blue-mid p-4 rounded-md shadow-md shadow-blue-mid flex flex-col items-center w-full max-w-sm mx-auto">
                   <h3 className="text-xl mb-2 font-semibold text-center">{event.eventName}</h3>
                   {event.photo ? (
-                    <img src={`http://localhost:8000${event.photo}`} alt="Foto do Evento" className="h-32 rounded-md mb-2" />
+                    <img src={`${image_url}${event.photo}`} alt="Foto do Evento" className="h-32 rounded-md mb-2" />
                   ) : (
                     <p>Foto do evento não disponível</p>
                   )}
@@ -288,13 +289,13 @@ const MainPage: React.FC = () => {
                   {event.qrCode && (
                     <div className="w-full flex flex-col items-center mb-2">
                       <img
-                        src={`http://localhost:8000${event.qrCode}`}
+                        src={`${image_url}${event.qrCode}`}
                         alt="QR Code do Evento"
                         className="h-32 rounded-md cursor-pointer"
-                        onClick={() => openQrCodeImage(`http://localhost:8000${event.qrCode}`)}
+                        onClick={() => openQrCodeImage(`${image_url}${event.qrCode}`)}
                       />
                       <button
-                        onClick={() => downloadImage(`http://localhost:8000${event.qrCode}`)}
+                        onClick={() => downloadImage(`${image_url}${event.qrCode}`)}
                         className="bg-green text-black py-2 px-3 rounded-md mt-2"
                       >
                         <FaDownload />
