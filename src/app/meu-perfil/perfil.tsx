@@ -12,7 +12,6 @@ const UserAccount = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
   const [isImageChanged, setIsImageChanged] = useState<boolean>(false);
-  const img_url = process.env.NEXT_PUBLIC_API_BASE_URL
   const [userData, setUserData] = useState({
     username: '',
     email: '',
