@@ -274,18 +274,6 @@ const MainPage: React.FC = () => {
               </button>
             </div>
           )}
-
-          {!canAddEvent && (
-            <div className="text-center">
-              <button
-                onClick={handleRequestPermission}
-                className="bg-yellow text-white py-2 px-4 rounded-md hover:bg-yellow"
-              >
-                Solicitar Permissão
-              </button>
-            </div>
-          )}
-
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             {loader ? (
               <p>Carregando eventos...</p>
