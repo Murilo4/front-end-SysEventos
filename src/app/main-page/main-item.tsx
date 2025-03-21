@@ -99,7 +99,7 @@ const MainPage: React.FC = () => {
 
   const fetchUserData = useCallback(async () => {
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/user-profile/`, {
         method: 'GET',
         headers: {
