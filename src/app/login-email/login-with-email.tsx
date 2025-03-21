@@ -18,14 +18,12 @@ const LoginUser: React.FC = () => {
     router.push('/')
   };
 
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-  }
-
   const handleCloseModal = () => {
     setIsModalOpen(false);
   }
-
+  const handleRedirectCreateAccount = () => {
+    router.push('/registro-consumidor')
+  }
   const handleRedirectForgetPass = () => {
     router.push('/change-password')
     };
@@ -109,22 +107,19 @@ const LoginUser: React.FC = () => {
       <ToastContainer />
       <RegistrationModal isOpen={isModalOpen} onClose={handleCloseModal} />
       {/* Metade Esquerda (Azul) */}
-      <div className="w-1/2 bg-principal-blue text-white flex flex-col justify-center p-8">
-        <p className="text-3xl font-bold mb-20">Muito bom ve-lo pro aqui, vamos realizar seu login, para que possa estar organizando seus eventos!</p>
-        <h2 className="text-3xl font-bold mb-4">Você ainda não faz parte do SysEventos?</h2>
-        <p className="text-xl mb-6">
-          Vamos realizar o seu cadastro rapidamente para que você possa desfrutar de tudo que podemos oferecer!
-        </p>
+      <div className="bg-principal-blue w-1/2  text-white flex flex-col justify-center p-3 sm:p5 sm:w-1/2 ">
+        <p className=" text-xl mb-5 sm:text-3xl font-bold sm:mb-20">Muito bom ve-lo pro aqui, vamos realizar seu login, para que possa estar organizando seus eventos!</p>
+        <h2 className="text-lg sm:text-3xl font-bold mb-4">Você ainda não faz parte do SysEventos?</h2>
         <button
-          onClick={handleOpenModal}
-          className="bg-white text-black ml-2 py-3 px-4 rounded-3xl font-bold hover:bg-gray-200 transition hover:scale-105">
+          onClick={handleRedirectCreateAccount}
+          className="bg-white text-black px-2 ml-2 py-3 sm:px-4 rounded-3xl font-bold hover:bg-gray-200 transition hover:scale-105">
           Criar conta
         </button>
       </div>
 
       {/* Metade Direita (Branca) */}
-      <div className="w-1/2 bg-gray-100 flex flex-col justify-center p-8">
-        <form className="space-y-4" onSubmit={handleLogin}>
+      <div className="w-1/2 bg-gray-100 flex flex-col justify-center p-3 sm:p5">
+        <form className="space-y-3" onSubmit={handleLogin}>
           {/* CPF/CNPJ */}
           <input
             type="text"
@@ -145,28 +140,25 @@ const LoginUser: React.FC = () => {
           
           <button
             type="submit"
-            className="w-full mt-4 text-2xl bg-principal-blue hover:scale-95 scale-90 text-white font-bold py-3 px-4 rounded-3xl hover:bg-blue-600 transition"
+            className="w-full mt-4 text-xl sm:text-2xl bg-principal-blue hover:scale-95 scale-90 text-white font-bold py-3 px-4 rounded-3xl hover:bg-blue-600 transition"
           >
             {loader ? 'Logando...' : 'Logar'}
           </button>
           <button
             type="button"
             onClick={handleRedirect}
-            className="w-full mt-4 text-2xl bg-principal-blue hover:scale-95 scale-90 text-white font-bold py-3 px-4 rounded-3xl hover:bg-blue-600 transition"
+            className="w-full mt-2 sm:mt-4 text-lg sm:text-2xl bg-principal-blue hover:scale-95 scale-90 text-white font-bold py-3 px-4 rounded-3xl hover:bg-blue-600 transition"
           >
-            Ou realizar login com CPF/CNPJ
+            logar com CPF/CNPJ
           </button>
           <button
             type="button"
             onClick={handleRedirectForgetPass}
-            className="w-full flex text-orange-700 justify-center hover:underline mt-4 text-xl underline"
+            className="w-full flex text-orange-700 justify-center hover:underline mt-4 text-lg sm:text-xl underline"
           >
             Esqueci minha senha
           </button>
         </form>
-      </div>
-      <div className="bg-gray-300 absolute bottom-0 w-full pt-1">
-
       </div>
     </div>
   );
