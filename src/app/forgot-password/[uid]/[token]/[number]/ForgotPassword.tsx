@@ -51,7 +51,7 @@ const ResetPassword: React.FC = () => {
       const data = await response.json()
       if (data.success) {
         toast.success('Senha redefinida com sucesso.')
-        router.push('/login')
+        router.push('/')
       } else {
         toast.error(data.message || 'Erro ao redefinir senha.')
       }
