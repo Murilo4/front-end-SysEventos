@@ -128,11 +128,7 @@ const MainPage: React.FC = () => {
   const handleCreateEvent = () => {
       router.push('/criar-evento')
   }
-
-  const handleRequestPermission = () => {
-    toast.info('Solicitação de permissão enviada para um administrador.')
-  }
-
+  
   const handleDeleteEvent = async (eventId: string) => {
     setLoader(true)
     try {
