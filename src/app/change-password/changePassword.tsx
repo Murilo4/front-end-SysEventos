@@ -11,7 +11,7 @@ const ChangePassword: React.FC = () => {
   const [email, setEmail] = useState('')
 
   const handleRedirect = () => {
-    router.push('/login')
+    router.push('/')
   };
 
   const handlePasswordChangeEmail = async (event: React.FormEvent<HTMLFormElement>) => {
