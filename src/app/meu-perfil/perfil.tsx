@@ -12,6 +12,7 @@ const UserAccount = () => {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [isEditingPassword, setIsEditingPassword] = useState<boolean>(false);
   const [isImageChanged, setIsImageChanged] = useState<boolean>(false);
+  const img_url = process.env.NEXT_PUBLIC_API_BASE_URL
   const [userData, setUserData] = useState({
     username: '',
     email: '',
@@ -31,7 +32,7 @@ const UserAccount = () => {
     const fetchUserData = async () => {
       try {
         const cookies = new Cookies();
-        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+        const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
         const response = await fetch(`${apiUrl}/user-profile/`, {
           method: 'GET',
           headers: {
@@ -55,7 +56,7 @@ const UserAccount = () => {
 
           // Se a foto não estiver disponível, usa a foto padrão
           if (fetchedData.photo) {
-            const fullImageUrl = `http://localhost:8000${fetchedData.photo}`;
+            const fullImageUrl = `${image_url}${fetchedData.photo}`;
             setImage(fullImageUrl); // A URL completa da foto do usuário
           } else {
             setImage('/foto-padrao.png'); // Imagem padrão
@@ -98,7 +99,7 @@ const UserAccount = () => {
   const handleSaveImage = async () => {
   try {
     const cookies = new Cookies();
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
     const file = fileInputRef.current?.files?.[0]; // Get the file safely
 
     if (!file) {
@@ -134,7 +135,7 @@ const UserAccount = () => {
     e.preventDefault(); // Prevent form submission from refreshing the page
     try {
       const cookies = new Cookies();
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/update-user/`, {
         method: 'PUT',
         headers: {
@@ -161,7 +162,7 @@ const UserAccount = () => {
   const handlePasswordReset = async () => {
     try {
       const cookies = new Cookies();
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000';
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/request-reset/`, {
         method: 'POST',
         headers: {
