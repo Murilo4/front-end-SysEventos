@@ -300,7 +300,7 @@ const UserAccount = () => {
           <div className="relative w-60 h-60 mb-8">
             <div className="w-full h-full rounded-full overflow-hidden">
               {image && (
-                <Image
+                <img
                   src={image}
                   alt="Foto de perfil"
                   width={240}
