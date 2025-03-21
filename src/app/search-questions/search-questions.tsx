@@ -43,7 +43,6 @@ const questionTypeTranslation: { [key: string]: string } = {
 }
 
 const SearchQuestionsPage: React.FC = () => {
-    const [questions, setQuestions] = useState<Question[]>([])
     const [filteredQuestions, setFilteredQuestions] = useState<Question[]>([])
     const [searchTerm, setSearchTerm] = useState<string>('')
 
@@ -89,7 +88,6 @@ const SearchQuestionsPage: React.FC = () => {
             })
             const data = await response.json()
             if (response.ok && data.success) {
-                setQuestions(data.data.questions)
                 setFilteredQuestions(data.data.questions)
                 setHasNext(data.data.hasNext)
                 setHasBack(data.data.hasBack)
