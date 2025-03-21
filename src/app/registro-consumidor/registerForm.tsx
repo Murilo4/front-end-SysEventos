@@ -146,13 +146,12 @@ export const RegisterFormSection = () => {
       <ToastContainer />
       <div className="flex h-screen">
         {/* Metade Esquerda (Azul) */}
-        <div className="w-1/2 bg-principal-blue text-white flex flex-col justify-center p-8">
-          <h2 className="text-3xl font-bold mb-4">Que bom que você deseja Fazer parte da Contur!</h2>
+        <div className="w-1/2 bg-principal-blue text-white flex flex-col justify-center p-3 sm:p5">
           <p className="text-xl mb-6">
             Vamos realizar o seu cadastro rapidamente para você possa desfrutar de tudo que podemos oferecer!
           </p>
           <p className="text-xl mb-6">
-            Caso já tenha uma conta e deseja utiliza-la, você pode realizar o login através deste botão:
+            Caso já tenha uma conta:
           </p>
           <Link href="/">
             <button className="bg-white w-full text-black py-3 px-4 rounded-3xl scale-95 hover:scale-100 font-bold hover:bg-gray-200 transition">
@@ -162,7 +161,7 @@ export const RegisterFormSection = () => {
         </div>
 
         {/* Metade Direita (Branca) */}
-        <div className="w-1/2 bg-gray-100 flex flex-col justify-center p-8">
+        <div className="w-1/2 bg-gray-100 flex flex-col justify-center p-3">
           <form className="space-y-4" onSubmit={handleFormSubmit}>
             {/* Campo Nome Completo */}
             <input
