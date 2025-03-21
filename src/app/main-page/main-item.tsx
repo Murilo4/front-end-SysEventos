@@ -126,11 +126,7 @@ const MainPage: React.FC = () => {
 
 
   const handleCreateEvent = () => {
-    if (canAddEvent) {
       router.push('/criar-evento')
-    } else {
-      toast.warning('Você não tem permissão para criar eventos. Solicite permissão!')
-    }
   }
 
   const handleRequestPermission = () => {
@@ -272,9 +268,9 @@ const MainPage: React.FC = () => {
               <button
                 onClick={handleCreateEvent}
                 className="bg-principal-blue text-white py-2 px-4 mb-4 rounded-md hover:bg-blue-600"
-                disabled={canAddEvent === false}
+
               >
-                {canAddEvent ? 'Criar Novo Evento' : 'Solicitar Permissão para Criar Evento'}
+               Criar Novo Evento
               </button>
             </div>
           )}
