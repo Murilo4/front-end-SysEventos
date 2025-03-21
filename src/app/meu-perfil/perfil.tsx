@@ -49,14 +49,13 @@ const UserAccount = () => {
             phone: data.userData.phone,
             photo: data.userData.photo // Foto vinda do backend
           };
-          console.log(data.subscriptionData.PlanName)
           setPlanData({ planName: data.subscriptionData.PlanName }); // Ensure planData is set correctly
           setUserData(fetchedData);
           setOriginalUserData(fetchedData);
 
           // Se a foto não estiver disponível, usa a foto padrão
           if (fetchedData.photo) {
-            const fullImageUrl = `${image_url}${fetchedData.photo}`;
+            const fullImageUrl = `${fetchedData.photo}`;
             setImage(fullImageUrl); // A URL completa da foto do usuário
           } else {
             setImage('/foto-padrao.png'); // Imagem padrão
