@@ -38,6 +38,7 @@ const ControlEvento: React.FC = () => {
   const [registrationCount, setRegistrationCount] = useState<number>(0)
   const [showConfirmationModal, setShowConfirmationModal] = useState<boolean>(false)
   const { id: eventId } = useParams()
+  const imageUrl = process.env.NEXT_PUBLIC_API_BASE_URL
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState<number>(0)
   const [isLoadingQuestions, setIsLoadingQuestions] = useState(true)
   const [isEventStarted, setIsEventStarted] = useState(false)
@@ -56,7 +57,7 @@ const ControlEvento: React.FC = () => {
   const fetchEventDetails = useCallback(async () => {
     const token = cookies.get('access')
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/get-event/${eventId}/`, {
         method: 'GET',
         headers: {
@@ -102,7 +103,7 @@ const ControlEvento: React.FC = () => {
   const fetchRegistrationCount = useCallback(async () => {
     const token = cookies.get('access')
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/get-registration-count/${eventId}/`, {
         method: 'GET',
         headers: {
@@ -129,7 +130,7 @@ const ControlEvento: React.FC = () => {
     setIsLoadingQuestions(true)
     const token = cookies.get('access')
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/get-questions/${eventId}/`, {
         method: 'GET',
         headers: {
@@ -209,7 +210,7 @@ const ControlEvento: React.FC = () => {
 
   const sendQuestionChangeRequest = async (url: string, questionId: string) => {
     const token = cookies.get('access')
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 
     try {
       const response = await fetch(`${apiUrl}${url}/${questionId}/`, {
@@ -236,7 +237,7 @@ const ControlEvento: React.FC = () => {
 
   const handleStartEvent = async (url: string, questionId: string) => {
     const token = cookies.get('access')
-    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+    const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
 
     try {
       const response = await fetch(`${apiUrl}${url}/${questionId}/`, {
@@ -270,7 +271,7 @@ const ControlEvento: React.FC = () => {
     const token = cookies.get('access')
     const storedFilterId = filterId || localStorage.getItem('filterId')
     try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8000'
+      const apiUrl = process.env.NEXT_PUBLIC_API_BASE_URL
       const response = await fetch(`${apiUrl}/end-event/${eventId}/${storedFilterId}/`, {
         method: 'POST',
         headers: {
@@ -318,7 +319,7 @@ const ControlEvento: React.FC = () => {
           <p className="text-lg text-gray-600">{event?.description}</p>
           {event?.photo && (
             <img
-              src={`http://localhost:8000${event.photo}`}
+              src={`${imageUrl}${event.photo}`}
               alt="Foto do Evento"
               className="sm:w-80 max-w-2xl mx-auto rounded-lg shadow-md mt-4"
             />
