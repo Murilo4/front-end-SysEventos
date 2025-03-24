@@ -273,8 +273,8 @@ const SearchQuestionsPage: React.FC = () => {
                         placeholder="Digite para pesquisar..."
                     />
                 </div>
-                <div className="flex">
-                    <div className="w-1/4 p-4">
+                <div className="flex flex-col md:flex-row">
+                    <div className="w-full md:w-1/4 p-4">
                         <h2 className="text-xl font-semibold mb-4">Filtros</h2>
                         <div className="mb-4">
                             <label className="block mb-2">Filtrar por:</label>
