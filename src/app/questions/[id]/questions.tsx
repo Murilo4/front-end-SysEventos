@@ -53,6 +53,7 @@ const QuestionsPage: React.FC = () => {
   const [previewURL, setPreviewURL] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const cookies = useMemo(() => new Cookies(), [])
+  const image_url = process.env.NEXT_PUBLIC_API_BASE_URL
   const router = useRouter()
 
   const { id: eventId } = useParams()
@@ -158,7 +159,7 @@ const QuestionsPage: React.FC = () => {
     setOptions(question.answers || [])
     setQuestionType(question.questionType)
     setQuestionImage(question.photo); // Reset image state when editing
-    setPreviewURL(question.photo ? `http://localhost:8000${question.photo}` : null); // Set preview URL if image exists
+    setPreviewURL(question.photo ? `${image_url}${question.photo}` : null); // Set preview URL if image exists
   }
 
   const handleCancelEdit = () => {
@@ -471,19 +472,19 @@ const QuestionsPage: React.FC = () => {
       <div className="container mx-auto p-3 relative">
         {/* Exibição dos dados do evento */}
         {eventDetails && (
-          <div className="w-full scale-y-75 scale-x-90 justify-start bg-gray-200 border border-b-gray-400 p-2 rounded-md shadow-md sm:w-1/2 sm:scale-90 sm:flex sm:flex-col">
+          <div className="w-full bg-gray-200 border border-b-gray-400 p-2 rounded-md shadow-md sm:w-1/2 sm:scale-90 sm:flex sm:flex-col">
             <h3 className="text-xl font-semibold">Detalhes do Evento</h3>
             <p><strong>Nome do Evento:</strong> {eventDetails.eventName}</p>
             <p><strong>Data:</strong> {eventDetails.data}</p>
             <p><strong>Horario:</strong> {eventDetails.horarioInicio} até as {eventDetails.horarioFinal}</p>
             {eventDetails.photo ? (
-              <img src={`http://localhost:8000${eventDetails.photo}`} alt="Foto do Evento" className="w-2/5 rounded-md" />
+              <img src={`${image_url}${eventDetails.photo}`} alt="Foto do Evento" className="w-2/5 rounded-md" />
             ) : (
               <p>Foto do evento não disponível</p>
             )}
           </div>
         )}
-        <div className="absolute top-4 right-1 flex space-x-4 sm:flex-col sm:space-x-0 sm:space-y-2 z-10">
+        <div className="relative sm:absolute sm:top-4 sm:right-1 flex space-x-4 sm:flex-col sm:space-x-0 sm:space-y-2 z-10 mt-4 sm:mt-0">
           <button
             onClick={() => router.push('/main-page')}
             className="bg-blue text-white py-2 px-4 rounded-md hover:bg-blue"
@@ -659,7 +660,7 @@ const QuestionsPage: React.FC = () => {
                   </div>
                 </div>
                 {question.photo && (
-                  <img src={`http://localhost:8000${question.photo}`} alt="Pergunta" className="w-20 h-28 object-fill sm:w-52 sm:max-h-48 rounded-md" />
+                  <img src={`${image_url}${question.photo}`} alt="Pergunta" className="w-20 h-28 object-fill sm:w-52 sm:max-h-48 rounded-md" />
                 )}
               </div>
             ))}
