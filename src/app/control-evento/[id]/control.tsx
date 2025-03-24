@@ -321,8 +321,8 @@ const ControlEvento: React.FC = () => {
             <img
               src={`${imageUrl}${event.photo}`}
               alt="Foto do Evento"
-              className="sm:w-80 max-w-2xl mx-auto rounded-lg shadow-md mt-4"
-            />
+            className="w-80 h-60 mx-auto rounded-lg shadow-md mt-4 object-cover"
+          />
           )}
         </div>
 
