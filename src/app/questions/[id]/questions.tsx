@@ -478,7 +478,7 @@ const QuestionsPage: React.FC = () => {
             <p><strong>Data:</strong> {eventDetails.data}</p>
             <p><strong>Horario:</strong> {eventDetails.horarioInicio} até as {eventDetails.horarioFinal}</p>
             {eventDetails.photo ? (
-              <img src={`${image_url}${eventDetails.photo}`} alt="Foto do Evento" className="w-2/5 rounded-md" />
+              <img src={`${image_url}${eventDetails.photo}`} alt="Foto do Evento" className="w-2/5 rounded-md h-28" />
             ) : (
               <p>Foto do evento não disponível</p>
             )}
